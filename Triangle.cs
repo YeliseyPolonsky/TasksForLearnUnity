@@ -10,13 +10,8 @@ namespace Triangles
     {
         static void Main(string[] args)
         {
-<<<<<<< HEAD
             const int DefaultTriangleCommand = 1;
             const int FlippedOverTtiangleCommand = 2;
-=======
-            const string DefaultTriangleCommand = "1";
-            const string FlippedOverTtiangleCommand = "2";
->>>>>>> 162bc78b2c624fbf1f649a97f6dc8dd390b18075
             Console.Write($"Введите:{DefaultTriangleCommand}- обычный треугольник.\n{FlippedOverTtiangleCommand} - перевернутый треуголник.\n\nВаш выбор: ");
             string EulerAngel = Console.ReadLine();
 
@@ -81,12 +76,6 @@ namespace Triangles
                 CountOfStarsAtLine--;
                 Console.WriteLine();
             }
-        }
-
-        static int GetString(int command)
-        { 
-                return Convert.ToInt32(command);     
-        }
+        } 
     }
 }
-
