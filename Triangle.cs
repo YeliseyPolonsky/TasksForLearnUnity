@@ -10,18 +10,18 @@ namespace Triangles
     {
         static void Main(string[] args)
         {
-            const string OPTION1 = "1";
-            const string OPTION2 = "2";
-            Console.Write($"Введите:{OPTION1}- обычный треугольник.\n{OPTION2} - перевернутый треуголник.\n\nВаш выбор: ");
+            const string DefaultTriangleCommand = "1";
+            const string FlippedOverTtiangleCommand = "2";
+            Console.Write($"Введите:{DefaultTriangleCommand}- обычный треугольник.\n{FlippedOverTtiangleCommand} - перевернутый треуголник.\n\nВаш выбор: ");
             string EulerAngel = Console.ReadLine();
 
             switch (EulerAngel)
             {
-                case OPTION1:
+                case DefaultTriangleCommand:
                     DrawDefaultTriangle();
                     break;
 
-                case OPTION2:
+                case FlippedOverTtiangleCommand:
                     DrawFlippedOverTtiangle();
                     break;
 
