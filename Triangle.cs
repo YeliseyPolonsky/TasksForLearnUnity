@@ -9,17 +9,19 @@ namespace Triangles
     class Program
     {
         static void Main(string[] args)
-        {         
-            Console.Write("Введите:\n1 - обычный треугольник.\n2 - перевернутый треуголник.\n\nВаш выбор: ");
+        {
+            const int DefaultTriangleCommand = 1;
+            const int FlippedOverTtiangleCommand = 2;
+            Console.Write($"Введите:{DefaultTriangleCommand}- обычный треугольник.\n{FlippedOverTtiangleCommand} - перевернутый треуголник.\n\nВаш выбор: ");
             string EulerAngel = Console.ReadLine();
 
             switch (EulerAngel)
             {
-                case "1":
+                case DefaultTriangleCommand:
                     DrawDefaultTriangle();
                     break;
 
-                case "2":
+                case FlippedOverTtiangleCommand:
                     DrawFlippedOverTtiangle();
                     break;
 
@@ -27,7 +29,7 @@ namespace Triangles
                     Console.Write("Вы ввели некоректное значение");
                     break;
             }
-           
+
             Console.WriteLine("\nГотово!");
             Console.ReadKey(true);
         }
@@ -75,5 +77,11 @@ namespace Triangles
                 Console.WriteLine();
             }
         }
+
+        static int GetString(int command)
+        { 
+                return Convert.ToInt32(command);     
+        }
     }
 }
+
