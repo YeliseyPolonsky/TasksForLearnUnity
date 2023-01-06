@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,17 +9,19 @@ namespace Triangles
     class Program
     {
         static void Main(string[] args)
-        {         
-            Console.Write("Введите:\n1 - обычный треугольник.\n2 - перевернутый треуголник.\n\nВаш выбор: ");
+        {
+            const string OPTION1 = "1";
+            const string OPTION2 = "2";
+            Console.Write($"Введите:{OPTION1}- обычный треугольник.\n{OPTION2} - перевернутый треуголник.\n\nВаш выбор: ");
             string EulerAngel = Console.ReadLine();
 
             switch (EulerAngel)
             {
-                case "1":
+                case OPTION1:
                     DrawDefaultTriangle();
                     break;
 
-                case "2":
+                case OPTION2:
                     DrawFlippedOverTtiangle();
                     break;
 
@@ -27,7 +29,7 @@ namespace Triangles
                     Console.Write("Вы ввели некоректное значение");
                     break;
             }
-           
+
             Console.WriteLine("\nГотово!");
             Console.ReadKey(true);
         }
