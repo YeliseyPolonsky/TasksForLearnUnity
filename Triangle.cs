@@ -13,9 +13,8 @@ namespace Triangles
             const int DefaultTriangleCommand = 1;
             const int FlippedOverTtiangleCommand = 2;
             Console.Write($"Введите:{DefaultTriangleCommand}- обычный треугольник.\n{FlippedOverTtiangleCommand} - перевернутый треуголник.\n\nВаш выбор: ");
-            string EulerAngel = Console.ReadLine();
 
-            switch (EulerAngel)
+            switch (GetNumber())
             {
                 case DefaultTriangleCommand:
                     DrawDefaultTriangle();
@@ -26,7 +25,7 @@ namespace Triangles
                     break;
 
                 default:
-                    Console.Write("Вы ввели некоректное значение");
+                    Console.WriteLine("Вы ввели некоректное значение");
                     break;
             }
 
@@ -37,7 +36,7 @@ namespace Triangles
         static int AskQuationOfHeight()
         {
             Console.Write("Какой высоты треугольник? : ");
-            int CountLine = Convert.ToInt32(Console.ReadLine());
+            int CountLine = GetNumber();
             Console.WriteLine("\n");
             return CountLine;
         }
@@ -45,17 +44,14 @@ namespace Triangles
         static void DrawDefaultTriangle()
         {
             int CountLine = AskQuationOfHeight();
-            int CountOfStarsAtLine = 1;
 
             for (int i = 0; i < CountLine; i++)
             {
-
-                for (int j = 0; j < CountOfStarsAtLine; j++)
+                for (int j = 0; j <= i; j++)
                 {
                     Console.Write("*");
                 }
 
-                ++CountOfStarsAtLine;
                 Console.WriteLine();
             }
         }
@@ -67,7 +63,6 @@ namespace Triangles
 
             for (int i = 0; i < CountLine; i++)
             {
-
                 for (int j = 0; j < CountOfStarsAtLine; j++)
                 {
                     Console.Write("*");
@@ -77,5 +72,21 @@ namespace Triangles
                 Console.WriteLine();
             }
         } 
+
+        static int GetNumber()
+        {
+            bool isWorking = true;
+            int number = 0;
+
+            while(isWorking)
+            {
+                if (int.TryParse(Console.ReadLine(), out number))
+                    isWorking = false;
+                else
+                    Console.WriteLine("Ошибка!"); 
+            }
+
+            return number;
+        }
     }
 }
