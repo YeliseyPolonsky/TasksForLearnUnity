@@ -21,16 +21,13 @@ namespace ConvertValuta
             float rublesToDollars = 0.0138f;
             float rublesToEuro = 0.013f;
 
-            Dictionary<string, float> rateCurrency = new Dictionary<string, float>();
-            rateCurrency.Add("dollarsToRubles", dollarsToRubles);
-            rateCurrency.Add("dollarsToEuro", dollarsToEuro);
-            rateCurrency.Add("eurosToDallars", eurosToDallars);
-            rateCurrency.Add("eurosToRubles", eurosToRubles);
-            rateCurrency.Add("rublesToDollars", rublesToDollars);
-            rateCurrency.Add("rublesToEuro", rublesToEuro);
-
-            const int CONVERT = 1;
-            const int EXIT = 2;
+            const int CONVERT_dollarsToRubles = 1;
+            const int CONVERT_dollarsToEuro = 2;
+            const int CONVERT_eurosToDallars = 3;
+            const int CONVERT_eurosToRubles = 4;
+            const int CONVERT_rublesToDollars = 5;
+            const int CONVERT_rublesToEuro = 6;
+            const int EXIT = 7;
 
             bool isWorking = true;
 
@@ -38,105 +35,58 @@ namespace ConvertValuta
             {
                 ShowInfo(ref rubles, ref dollars, ref euros);
 
-                if (GetNumber($"Что бы вы хотели сделать: {CONVERT} - конвертировать.\n" +
-                    $"{EXIT} - выйти из рограммы.\n" +
-                    "Ваш выбор: ", new List<int> { EXIT, CONVERT }) == EXIT)
-                    isWorking = false;
-                else
-                    switch (GetNumber("Какую валюту вы хотите конвертировать : \n" +
-                $"1 - рубли.\n2 - доллары.\n3 - евро.", new List<int>() { 1, 2, 3 }))
-                    {
-                        case 1:
-                            ConvertRubles(ref rubles, ref dollars, ref euros, rateCurrency);
-                            break;
+                switch (GetNumber("Что вы хотите сделать : \n" +
+            $"1 - конвертировать доллары в рубли.\n" +
+            $"2 - конвертировать доллары в евро.\n" +
+            $"3 - конвертировать евро в доллары.\n" +
+            $"4 - конвертировать евро в рубли.\n" +
+            $"5 - конвертировать рубли в доллары.\n" +
+            $"6 - конвертировать рубли в евро.\n" +
+            $"7 - выйти из программы.",
+            new List<int>() { CONVERT_dollarsToRubles, CONVERT_dollarsToEuro, CONVERT_eurosToDallars, CONVERT_eurosToRubles, CONVERT_rublesToDollars, CONVERT_rublesToEuro, EXIT }))
+                {
+                    case CONVERT_dollarsToRubles:
+                        Convert(ref dollars, ref rubles, dollarsToRubles);
+                        break;
 
-                        case 2:
-                            ConvertDollars(ref rubles, ref dollars, ref euros, rateCurrency);
-                            break;
+                    case CONVERT_dollarsToEuro:
+                        Convert(ref dollars, ref euros, dollarsToEuro);
+                        break;
 
-                        case 3:
-                            ConvertEuros(ref rubles, ref dollars, ref euros, rateCurrency);
-                            break;
-                    }
+                    case CONVERT_eurosToDallars:
+                        Convert(ref euros, ref dollars, eurosToDallars);
+                        break;
+
+                    case CONVERT_eurosToRubles:
+                        Convert(ref euros, ref rubles, eurosToRubles);
+                        break;
+
+                    case CONVERT_rublesToDollars:
+                        Convert(ref rubles, ref dollars, rublesToDollars);
+                        break;
+
+                    case CONVERT_rublesToEuro:
+                        Convert(ref rubles, ref euros, rublesToEuro);
+                        break;
+
+                    case EXIT:
+                        isWorking = false;
+                        break;
+
+                }
                 Console.Clear();
             }
             Console.WriteLine("Конец");
         }
 
-
-        static void ConvertRubles(ref float rublus, ref float dollars, ref float euros, Dictionary<string, float> rateCurrency)
+        static void Convert(ref float currencyOfConvert, ref float currencyToConvert, float rate)
         {
-            Console.WriteLine("Сколько рублей вы хотите конвертировать?");
-            float countCurrency = Convert.ToSingle(Console.ReadLine());
+            float countCurrency = GetCountCurrensy();
 
-            if (countCurrency <= rublus)
+            if (countCurrency <= currencyOfConvert)
             {
-                switch (GetNumber("В какую валюту вы хотите конвертировать? : \n"
-                        + $"1 - доллары.\n2 - евро.", new List<int>() { 1, 2 }))
-                {
-                    case 1:
-                        dollars += countCurrency * rateCurrency["rublesToDollars"];
-                        break;
-
-                    case 2:
-                        euros += countCurrency * rateCurrency["rublesToEuros"];
-                        break;
-                }
-                rublus -= countCurrency;
-            }
-            else
-            {
-                Console.WriteLine("У вас столько нету!!");
-                Console.ReadKey();
-            }
-        }
-
-        static void ConvertDollars(ref float rublus, ref float dollars, ref float euros, Dictionary<string, float> rateCurrency)
-        {
-            Console.WriteLine("Сколько долларов вы хотите конвертировать?");
-            float countCurrency = Convert.ToSingle(Console.ReadLine());
-
-            if (countCurrency <= dollars)
-            {
-                switch (GetNumber("В какую валюту вы хотите конвертировать? : \n"
-                        + $"1 - рубли.\n2 - евро.", new List<int>() { 1, 2 }))
-                {
-                    case 1:
-                        rublus += countCurrency * rateCurrency["dollarsToRubles"];
-                        break;
-
-                    case 2:
-                        euros += countCurrency * rateCurrency["dollarsToEuros"];
-                        break;
-                }
-                dollars -= countCurrency;
-            }
-            else
-            {
-                Console.WriteLine("У вас столько нету!!");
-                Console.ReadKey();
-            }
-        }
-
-        static void ConvertEuros(ref float rublus, ref float dollars, ref float euros, Dictionary<string, float> rateCurrency)
-        {
-            Console.WriteLine("Сколько евро вы хотите конвертировать?");
-            float countCurrency = Convert.ToSingle(Console.ReadLine());
-
-            if (countCurrency <= euros)
-            {
-                switch (GetNumber("В какую валюту вы хотите конвертировать? : \n"
-                        + $"1 - рубли.\n2 - доллары.", new List<int>() { 1, 2 }))
-                {
-                    case 1:
-                        rublus += countCurrency * rateCurrency["eurosToRubles"];
-                        break;
-
-                    case 2:
-                        dollars += countCurrency * rateCurrency["eurosToDollars"];
-                        break;
-                }
-                euros -= countCurrency;
+                currencyToConvert += countCurrency * rate;
+                currencyOfConvert -= countCurrency;
             }
             else
             {
@@ -163,6 +113,13 @@ namespace ConvertValuta
                 else
                     Console.WriteLine("Ошибка!");
             return number;
+        }
+
+        static float GetCountCurrensy()
+        {
+            Console.WriteLine("Cколько валюты вы хотите конвертировать?");
+            float countCurrency = float.Parse(Console.ReadLine());
+            return countCurrency;
         }
 
         static void ShowInfo(ref float rublus, ref float dollars, ref float euros)
