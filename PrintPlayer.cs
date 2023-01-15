@@ -20,7 +20,7 @@ namespace ConsoleApp38
     {
         public int PositionX { private set; get; }
         public int PositionY { private set; get; }
-
+        
         public Player(int positionX, int positionY)
         {
             PositionX = positionX;
@@ -36,8 +36,8 @@ namespace ConsoleApp38
         {
             this.player = player;
             this._symbolOfPlayer = symbolOfPlayer;
-
         }
+        
         public void PrintPlayer()
         {
             Console.SetCursorPosition(player.PositionX, player.PositionY);
