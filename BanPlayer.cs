@@ -8,7 +8,7 @@ namespace DataBase
         static void Main(string[] args)
         {
             Database database = new Database();
-            database.StartWorking();
+            database.StartWork();
         }
     }
 
@@ -42,7 +42,7 @@ namespace DataBase
     {
         private List<Player> _dataBase = new List<Player>();
 
-        public void StartWorking()
+        public void StartWork()
         {
             const int OPTION_ADD_PLAYER = 1;
             const int OPTION_DELETE_PLAYER = 2;
