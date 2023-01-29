@@ -9,50 +9,78 @@ namespace ConsoleApp40
     class Program
     {
         static void Main(string[] args)
-        { 
-            Player Stas = new Player(1, "Stas");
-            Player Vano = new Player(2, "Vano");
-            Player Yelisey = new Player(3, "Yelisey");
-            Player Ilya = new Player(4, "Ilya");
-            Server server = new Server(new List<Player>() { Stas, Vano, Yelisey, Ilya });
-            server.Ban(1);
-            Console.WriteLine(Stas._flag);
+        {
+            Player Stas = new Player(1, "Stas",35);
+            Player Vano = new Player(2, "Vano",56);
+            Player Yelisey = new Player(3, "Yelisey",30);
+            Player Ilya = new Player(4, "Ilya",30);
+            Database server = new Database(new List<Player>() { Stas, Vano, Yelisey, Ilya });
+            server.AddPlayer(4, "Ilya1982", 30);
+            server.BanByNumberAtDataBase(1);
         }
     }
 
     class Player
     {
-        public int _number;
-        public string _name;
-        public bool _flag;
-        
-        public Player(int number,string name)
+        public int Number { get; private set; }
+        private string _name;
+        private bool _isBaned;
+        private int Level;
+
+        public Player(int number, string name,int level)
         {
-            _number = number;
+            Number = number;
             _name = name;
-            _flag = false;
+            _isBaned = false;
+            Level = level;
         }
-        
+
         public bool GetFlag()
         {
-            return _flag;
+            return _isBaned;
         }
+
+        public void BanPlayer()
+        {
+            _isBaned = true;
+        }
+
+        public void UnBanPlayer()
+        {
+            _isBaned = false;
+        }
+
+        
     }
-    class Server
+    class Database
     {
-        private List<Player> _server;
+        private List<Player> _dataBase;
 
-        public Server(List<Player> server)
+        public Database(List<Player> dataBase)
         {
-            _server = server;
+            _dataBase = dataBase;
         }
 
-        public void Ban(int number)
+        public void BanByNumberAtDataBase(int number)
         {
-            foreach (Player player in _server)
+            foreach (Player player in _dataBase)
             {
-                if (player._number == number)
-                    player._flag = true;
+                if (player.Number == number)
+                    player.BanPlayer();
+            }
+        }
+
+        public void AddPlayer(int number, string name, int level)
+        {
+            _dataBase.Add(new Player(number, name, level));
+        }
+
+        public void UnBanByNumberAtDataBase(int number)
+        {
+            foreach (Player player in _dataBase)
+            {
+                if (player.Number == number)
+                    player.UnBanPlayer();
             }
         }
     }
