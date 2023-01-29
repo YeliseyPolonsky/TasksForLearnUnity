@@ -50,6 +50,7 @@ namespace DataBase
             const int OPTION_UNBAN_PLAYER = 4;
 
             bool isWorking = true;
+            
             while(isWorking)
             {
                 Console.WriteLine("Что вы хотите сделать:\n" +
