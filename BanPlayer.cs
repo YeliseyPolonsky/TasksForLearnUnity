@@ -97,7 +97,7 @@ namespace DataBase
             Console.WriteLine();
             Console.Write("Уровень игрока: ");
             int level = GetNumber();
-            Console.WriteLine("Уникальный номер данного игрока : "+number);
+            Console.WriteLine("Уникальный номер данного игрока : " + number);
             _players.Add(new Player(number, name, level));
         }
 
@@ -106,15 +106,15 @@ namespace DataBase
             int number = GetPlayerNumber();
             bool wasDone = false;
 
-            foreach (Player player in _players)
+            for (int i = 0; i < _players.Count; i++)
             {
-                if (player.Number == number)
+                if (_players[i].Number == number)
                 {
-                    _players.Remove(player);
+                    _players.Remove(_players[i]);
                     wasDone = true;
                 }
             }
-
+                
             if (wasDone == false)
                 Console.WriteLine("Игрока с таким номером не существует!");
         }
