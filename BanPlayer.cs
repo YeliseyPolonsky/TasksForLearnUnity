@@ -1,22 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ConsoleApp40
+namespace DataBase
 {
     class Program
     {
         static void Main(string[] args)
         {
-            Player Stas = new Player(1, "Stas",35);
-            Player Vano = new Player(2, "Vano",56);
-            Player Yelisey = new Player(3, "Yelisey",30);
-            Player Ilya = new Player(4, "Ilya",30);
-            Database server = new Database(new List<Player>() { Stas, Vano, Yelisey, Ilya });
-            server.AddPlayer(4, "Ilya1982", 30);
-            server.BanByNumberAtDataBase(1);
+            Database database = new Database();
+            database.StartWorking();
         }
     }
 
@@ -25,19 +17,14 @@ namespace ConsoleApp40
         public int Number { get; private set; }
         private string _name;
         private bool _isBaned;
-        private int Level;
+        private int _level;
 
-        public Player(int number, string name,int level)
+        public Player(int number, string name, int level)
         {
             Number = number;
             _name = name;
             _isBaned = false;
-            Level = level;
-        }
-
-        public bool GetFlag()
-        {
-            return _isBaned;
+            _level = level;
         }
 
         public void BanPlayer()
@@ -49,39 +36,142 @@ namespace ConsoleApp40
         {
             _isBaned = false;
         }
-
-        
     }
+
     class Database
     {
-        private List<Player> _dataBase;
+        private List<Player> _dataBase = new List<Player>();
 
-        public Database(List<Player> dataBase)
+        public void StartWorking()
         {
-            _dataBase = dataBase;
-        }
+            const int OPTION_ADD_PLAYER = 1;
+            const int OPTION_DELETE_PLAYER = 2;
+            const int OPTION_BAN_PLAYER = 3;
+            const int OPTION_UNBAN_PLAYER = 4;
 
-        public void BanByNumberAtDataBase(int number)
-        {
-            foreach (Player player in _dataBase)
+            bool isWorking = true;
+            while(isWorking)
             {
-                if (player.Number == number)
-                    player.BanPlayer();
-            }
+                Console.WriteLine("Что вы хотите сделать:\n" +
+                $"{OPTION_ADD_PLAYER} - добавить игрока;\n" +
+                $"{OPTION_DELETE_PLAYER} - удалить игрока;\n" +
+                $"{OPTION_BAN_PLAYER} - забанить игрока;\n" +
+                $"{OPTION_UNBAN_PLAYER} - разбанить игрока;\n");
+
+                switch (GetNumber())
+                {
+                    case OPTION_ADD_PLAYER:
+                        AddPlayer();
+                        break;
+
+                    case OPTION_DELETE_PLAYER:
+                        DeletePlayer();
+                        break;
+
+                    case OPTION_BAN_PLAYER:
+                        Ban();
+                        break;
+
+                    case OPTION_UNBAN_PLAYER:
+                        UnBan();
+                        break;
+
+                    default:
+                        Console.WriteLine("Вы ввели некоректное значение!");
+                        break;
+                }
+
+                Console.ReadLine();
+                Console.Clear();
+            }    
         }
 
-        public void AddPlayer(int number, string name, int level)
+        private void AddPlayer()
         {
+            int number = GetNumberOfPlayer();
+            Console.Write("Имя игрока: ");
+            string name = Console.ReadLine();
+            Console.WriteLine();
+            Console.Write("Уровень игрока: ");
+            int level = GetNumber();
             _dataBase.Add(new Player(number, name, level));
         }
 
-        public void UnBanByNumberAtDataBase(int number)
+        private void DeletePlayer()
         {
+            int number = GetNumberOfPlayer();
+            bool isMake = false;
+
             foreach (Player player in _dataBase)
             {
                 if (player.Number == number)
-                    player.UnBanPlayer();
+                {
+                    _dataBase.Remove(player);
+                    isMake = true;
+                }
             }
+
+            if(isMake == false)
+                Console.WriteLine("Игрока с таким номером не существует!");
+        }
+
+        private void UnBan()
+        {
+            int number = GetNumberOfPlayer();
+            bool isMake = false;
+
+            foreach (Player player in _dataBase)
+            {
+                if (player.Number == number)
+                {
+                    player.UnBanPlayer();
+                    isMake = true;
+                }
+            }
+
+            if (isMake == false)
+                Console.WriteLine("Игрока с таким номером не существует!");
+        }
+
+        private void Ban()
+        {
+            int number = GetNumberOfPlayer();
+            bool isMake = false;
+
+            foreach (Player player in _dataBase)
+            {
+                if (player.Number == number)
+                {
+                    player.BanPlayer();
+                    isMake = true;
+                }
+            }
+
+            if (isMake == false)
+                Console.WriteLine("Игрока с таким номером не существует!");
+        }
+
+        private int GetNumber()
+        {
+            bool isWork = true;
+            int result = 0;
+
+            while (isWork)
+                if (int.TryParse(Console.ReadLine(), out result))
+                    isWork = false;
+                else
+                    Console.WriteLine("Ошибка!");
+
+            Console.WriteLine();
+            return result;
+        }
+
+        private int GetNumberOfPlayer()
+        {
+            Console.Write("Введите номер игрока : ");
+            int number = GetNumber();
+            
+            return number;
         }
     }
 }
