@@ -64,11 +64,13 @@ class Croupier : Player
     Random rand = new Random();
     public void GiveCard()
     {
-        int countCards = 36;
+        int countCards = cardDeck.GetCardDesk().Count;
+        int indexCard;
 
         if (countCards > 0)
         {
-            int indexCard = rand.Next(0,countCards--);
+            indexCard = rand.Next(0,countCards);
+            Console.WriteLine(indexCard);
             _playerCards.Add(cardDeck.GetCardDesk()[indexCard]);
             cardDeck.GetCardDesk().RemoveAt(indexCard);
         }
