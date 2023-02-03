@@ -1,9 +1,9 @@
 using System;
-using System.Collections.Generic; 
+using System.Collections.Generic;
 
 namespace Cards
 {
-    class Program 
+    class Program
     {
         static void Main(string[] args)
         {
@@ -13,30 +13,32 @@ namespace Cards
     }
 }
 
-class Card  
+class Card
 {
-    public string Suit { get; private set; }
-    public string Meaning { get; private set; }
-
     public Card(string suit, string meaning)
     {
         Suit = suit;
         Meaning = meaning;
     }
+
+    public string Suit { get; private set; }
+
+    public string Meaning { get; private set; }
 }
 
-class Deck 
+class Deck
 {
     private string[] _suits = { "черви", "пики", "кресте", "бубы" };
-    private string[] _meanings = { "1", "2", "3", "4", "5", "6", "король", "дама", "валет" };
-    private List<Card> _cards = new List<Card>();
+    private string[] _meanings = { "6", "7", "8", "9", "10", "король", "дама", "валет" };
+    private List<Card> _cards;
 
-    public Deck() 
+    public Deck()
     {
+        _cards = new List<Card>();
         CreateCards();
     }
 
-    public void CreateCards() 
+    public void CreateCards()
     {
         for (int i = 0; i < _suits.Length; i++)
         {
@@ -47,7 +49,7 @@ class Deck
         }
     }
 
-    public List<Card> GetCardDesk()
+    public List<Card> GetListOfCards()
     {
         return _cards;
     }
@@ -55,44 +57,44 @@ class Deck
 
 class Player
 {
-    private List<Card> _cards = new List<Card>();  
+    private List<Card> _cards;
+
+    public Player()
+    {
+        _cards = new List<Card>();
+    }
 
     public List<Card> GetCards()
     {
         return _cards;
     }
 
-    public void ShowCards() 
+    public void ShowCards()
     {
-        foreach (Card card in _cards) 
+        foreach (Card card in _cards)
         {
-            Console.Write(card.Suit + " ");
-            Console.WriteLine(card.Meaning);
+            Console.WriteLine(card.Suit + " " + card.Meaning);
         }
     }
 }
 
-class Croupier  
+class Croupier
 {
-    private Player _player;
-    private Deck _deck = new Deck(); 
-    private Random random = new Random();
+    private Deck _deck;
 
-    public Croupier(Player player)
+    public Croupier()
     {
-        _player = player;
+        _deck = new Deck();
     }
 
-    public void GiveCard() 
+    public void GiveCard(Player player)  
     {
-        int countCards = _deck.GetCardDesk().Count;
-        int indexCard;
+        int countCards = _deck.GetListOfCards().Count; 
 
         if (countCards > 0)
         {
-            indexCard = random.Next(countCards); 
-            _player.GetCards().Add(_deck.GetCardDesk()[indexCard]);
-            _deck.GetCardDesk().RemoveAt(indexCard);
+                player.GetCards().Add(_deck.GetListOfCards()[0]);
+                _deck.GetListOfCards().RemoveAt(0);
         }
         else
         {
@@ -102,14 +104,14 @@ class Croupier
 
     public void ShowCards()
     {
-        foreach (Card card in _deck.GetCardDesk())
+        foreach (Card card in _deck.GetListOfCards())
         {
             Console.Write(card.Suit + " ");
             Console.WriteLine(card.Meaning);
         }
     }
 
-    public Deck GiveDeck()
+    public Deck GiveDeck() 
     {
         return _deck;
     }
@@ -117,38 +119,31 @@ class Croupier
 
 class MixingMachine
 {
-    private Croupier _croupier;
-
-    public MixingMachine(Croupier croupier)
-    {
-        _croupier = croupier;
-    }
-
-    public List<Card> MixCards()
+    public List<Card> MixCards(Deck deck)
     {
         Random random = new Random();
         Card buferCard;
-        List<Card> deck = _croupier.GiveDeck().GetCardDesk();
-        int countCards = deck.Count;
+        List<Card> cards = deck.GetListOfCards();
+        int countCards = cards.Count;
 
         for (int i = 0; i < countCards; i++)
         {
             int newIndex = random.Next(countCards);
-            buferCard = deck[newIndex];
-            deck[newIndex] = deck[i];
-            deck[i] = buferCard;
+            buferCard = cards[newIndex];
+            cards[newIndex] = cards[i];
+            cards[i] = buferCard;
         }
 
-        return deck;
+        return cards;
     }
 }
 
 class Casino
 {
-    public void StartWork() 
+    public void StartWork()
     {
-        const int OPTION_GET_CARD = 1; 
-        const int OPTION_SHOW_CARDS = 2; 
+        const int OPTION_GET_CARD = 1;
+        const int OPTION_SHOW_CARDS = 2;
         const int OPTION_EXIT = 3;
         const int OPTION_SHOW_REMAINING_CARDS = 4;
         const int OPTION_MIX_CARDS = 5;
@@ -156,24 +151,24 @@ class Casino
 
         bool isWorking = true;
         Player player = new Player();
-        Croupier croupier = new Croupier(player); 
-        MixingMachine mixingMachine = new MixingMachine(croupier); 
-        
+        Croupier croupier = new Croupier();
+        MixingMachine mixingMachine = new MixingMachine();
+
         Console.WriteLine("Приветствую!");
-        
+
         while (isWorking)
         {
             Console.WriteLine("Выберите действие: \n" +
-                $"{OPTION_GET_CARD} - взять карту;\n" + 
+                $"{OPTION_GET_CARD} - взять карту;\n" +
                 $"{OPTION_SHOW_CARDS} - вскрыть карты(показать)\n" +
                 $"{OPTION_EXIT} - выйти;\n" +
                 $"{OPTION_SHOW_REMAINING_CARDS} - показать оставшиеся карты;\n" +
                 $"{OPTION_MIX_CARDS} - перемешать колоду;");
 
-            switch (GetNumber()) 
+            switch (GetNumber())
             {
                 case OPTION_GET_CARD:
-                    croupier.GiveCard();
+                    croupier.GiveCard(player);
                     break;
 
                 case OPTION_SHOW_CARDS:
@@ -189,14 +184,14 @@ class Casino
                     break;
 
                 case OPTION_MIX_CARDS:
-                    mixingMachine.MixCards();
+                    mixingMachine.MixCards(croupier.GiveDeck());
                     break;
-                   
+
                 default:
                     Console.WriteLine("Вы ввели некоректное значение!");
                     break;
             }
-            
+
             Console.Write("Нажмите любую клавишу для продолжения.");
             Console.ReadKey();
             Console.Clear();
@@ -218,5 +213,5 @@ class Casino
         }
 
         return result;
-    }  
+    }
 }
