@@ -8,7 +8,7 @@ namespace Library
     {
         static void Main(string[] args)
         {
-            WorkbookStorage workbookStorage = new WorkbookStorage();
+            BooksBase workbookStorage = new BooksBase();
             workbookStorage.Work();
         }
     }
@@ -23,12 +23,14 @@ namespace Library
         }
 
         public string Name { get; private set; }
+
         public string Author { get; private set; }
+
         public int Year { get; private set; }
 
         public void ShowInformation()
         {
-            Console.WriteLine($"Имя: {Name}, автор: {Author}, год выпуска: {Year}");
+            Console.WriteLine($"имя: {Name}, автор: {Author}, год выпуска: {Year}");
         }
     }
 
@@ -48,14 +50,14 @@ namespace Library
 
         public void ShowAllBooks()
         {
-            foreach (Book book in _books)
-                book.ShowInformation();
+            for (int i = 0; i < _books.Count; i++)
+            {
+                Console.Write($"Номер : {i}, ");
+                _books[i].ShowInformation();
+            }
         }
 
-        public int GetBooksCount()
-        {
-            return _books.Count;
-        }
+        public int GetBooksCount => _books.Count;
 
         public Book GetBookAt(int index)
         {
@@ -63,7 +65,7 @@ namespace Library
         }
     }
 
-    class WorkbookStorage
+    class BooksBase
     {
         private Library _library = new Library();
         const int YearNow = 2023;
@@ -77,7 +79,8 @@ namespace Library
             const int OptionShowByAuthor = 3;
             const int OptinShowByYear = 4;
             const int OptionShowByName = 5;
-            const int OptionExit = 6;
+            const int OptionShowAllBooks = 6;
+            const int OptionExit = 7;
             bool IsWork = true;
 
             while (IsWork)
@@ -88,6 +91,7 @@ namespace Library
                 $"{OptionShowByAuthor} - показ по автору;\n" +
                 $"{OptinShowByYear} - показ по году выпуска;\n" +
                 $"{OptionShowByName} - показ по имени;\n" +
+                $"{OptionShowAllBooks} - показать все книги;\n" +
                 $"{OptionExit} - выйти");
 
                 switch (GetNumber())
@@ -110,6 +114,10 @@ namespace Library
 
                     case OptionShowByName:
                         ShowBooksByName();
+                        break;
+
+                    case OptionShowAllBooks:
+                        _library.ShowAllBooks();
                         break;
 
                     case OptionExit:
@@ -142,7 +150,7 @@ namespace Library
 
         private void DelateBook()
         {
-            int countBooks = _library.GetBooksCount();
+            int countBooks = _library.GetBooksCount;
 
             Console.Write("Номер : ");
             _library.DelateBookAt(GetNumberUpTo(countBooks - 1));
@@ -154,9 +162,10 @@ namespace Library
             Console.Write(" Автор : ");
             string Author = Console.ReadLine();
 
-            for (int i = 0; i < _library.GetBooksCount(); i++)
+            for (int i = 0; i < _library.GetBooksCount; i++)
             {
                 Book BookNaw = _library.GetBookAt(i);
+
                 if (BookNaw.Author == Author)
                 {
                     BookNaw.ShowInformation();
@@ -174,9 +183,10 @@ namespace Library
             Console.Write(" Название : ");
             string Name = Console.ReadLine();
 
-            for (int i = 0; i < _library.GetBooksCount(); i++)
+            for (int i = 0; i < _library.GetBooksCount; i++)
             {
                 Book BookNaw = _library.GetBookAt(i);
+
                 if (BookNaw.Name == Name)
                 {
                     BookNaw.ShowInformation();
@@ -194,9 +204,10 @@ namespace Library
             Console.Write(" Год издания : ");
             int Year = GetNumber();
 
-            for (int i = 0; i < _library.GetBooksCount(); i++)
+            for (int i = 0; i < _library.GetBooksCount; i++)
             {
                 Book BookNaw = _library.GetBookAt(i);
+
                 if (BookNaw.Year == Year)
                 {
                     BookNaw.ShowInformation();
