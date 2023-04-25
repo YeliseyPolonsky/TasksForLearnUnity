@@ -8,8 +8,8 @@ namespace Library
     {
         static void Main(string[] args)
         {
-            BooksBase workbookStorage = new BooksBase();
-            workbookStorage.Work();
+            BooksBase booksBase = new BooksBase();
+            booksBase.Work();
         }
     }
 
