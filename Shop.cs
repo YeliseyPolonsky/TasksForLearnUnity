@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Shop
 {
@@ -15,8 +14,9 @@ namespace Shop
 
     class Shop
     {
-        Player player = new Player(1000);
+        Player player = new Player();
         Salesman salesman = new Salesman(new List<Product> { new Product("Эликсир здоровья", 30), new Product("Золотое яблоко", 150), new Product("Банан", 10) });
+
         bool isWorking = true;
 
         public void Work()
@@ -36,30 +36,30 @@ namespace Shop
                     $"{OptionShowThings} - посмотреть свои вещи\n" +
                     $"{OptionExit} - выйти\n");
 
-                int Option = GetNumberWithinLimit(1, 4);
-
-                if (Option == OptionShowProducts)
-                    salesman.ShowProducts();
-
-                if (Option == OptionBuyProduct)
+                switch (GetNumber())
                 {
-                    Console.WriteLine($"Ваш баланс: {player.CountCoins}")
-                    Console.Write("Введите номер товара: ");
-                    int NumnerOfProduct = GetNumber();
-                    Product selectedProduct = salesman.GiveProduct(NumnerOfProduct);
+                    case OptionShowProducts:
+                        salesman.ShowProducts();
+                        break;
 
-                    if (selectedProduct.Price <= player.CountCoins)
-                    {
-                        player.GetProduct(selectedProduct);
-                        player.GiveCoins(selectedProduct.Price);
-                    }
+                    case OptionBuyProduct:
+                        Console.Write("Введите номер товара: ");
+                        int NumnerOfProduct = GetNumber();
+                        player.GetProduct(salesman.GiveProduct(NumnerOfProduct));
+                        break;
+
+                    case OptionShowThings:
+                        player.ShowThings();
+                        break;
+
+                    case OptionExit:
+                        isWorking = false;
+                        break;
+
+                    default:
+                        Console.WriteLine("Такой опции нету!");
+                        break;
                 }
-
-                if (Option == OptionShowThings)
-                    player.ShowThings();
-
-                if (Option == OptionExit)
-                    isWorking = false;
 
                 Console.WriteLine();
                 Console.Write("Нажмите любую клавишу для продолжения.");
@@ -69,36 +69,14 @@ namespace Shop
             }
         }
 
-        private int GetNumberWithinLimit(int minNumber, int maxNumber)
-        {
-            int result = 0;
-            bool isWorking = true;
-
-            while (isWorking)
-            {
-                if (int.TryParse(Console.ReadLine(), out result) && result <= maxNumber && result >= minNumber)
-                    isWorking = false;
-                else
-                    Console.WriteLine("Вы ввели некоректное чтсло! Попробуйте еще раз.");
-            }
-
-            return result;
-        }
-
         private int GetNumber()
         {
-            int result = 0;
-            bool isWorking = true;
+            int number = 0;
 
-            while (isWorking)
-            {
-                if (int.TryParse(Console.ReadLine(), out result))
-                    isWorking = false;
-                else
-                    Console.WriteLine("Вы ввели некоректное чтсло! Попробуйте еще раз.");
-            }
+            while (int.TryParse(Console.ReadLine(), out number) == false)
+                Console.WriteLine("Попробуйте снова");
 
-            return result;
+            return number;
         }
     }
 
@@ -108,20 +86,25 @@ namespace Shop
 
         public Salesman(List<Product> products)
         {
-            _products = products;
+            foreach (Product product in products)
+            {
+                _products.Add(product);
+            }
         }
 
         public Product GiveProduct(int number)
         {
+            Product product = null;
+
             int MinIndexInList = 0;
 
             if (number >= _products.Count || number < MinIndexInList)
             {
                 Console.WriteLine("Товара с таким номером не существует!");
-                return null;
+                return product;
             }
 
-            Product product = _products.ElementAt(number);
+            product = _products[number];
             _products.RemoveAt(number);
 
             return product;
@@ -141,18 +124,6 @@ namespace Shop
     {
         private List<Product> _things = new List<Product>();
 
-        public Player(int countCoins)
-        {
-            CountCoins = countCoins;
-        }
-
-        public int CountCoins { get; private set; }
-
-        public void GiveCoins(int count)
-        {
-            CountCoins -= count;
-        }
-
         public void GetProduct(Product product)
         {
             _things.Add(product);
@@ -161,9 +132,7 @@ namespace Shop
         public void ShowThings()
         {
             foreach (Product thing in _things)
-            {
                 Console.WriteLine(thing.Name);
-            }
         }
     }
 
