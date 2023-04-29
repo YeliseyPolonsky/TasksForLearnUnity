@@ -15,7 +15,7 @@ namespace Shop
 
     class Shop
     {
-        Player player = new Player();
+        Player player = new Player(1000);
         Salesman salesman = new Salesman(new List<Product> { new Product("Эликсир здоровья", 30), new Product("Золотое яблоко", 150), new Product("Банан", 10) });
         bool isWorking = true;
 
@@ -43,9 +43,16 @@ namespace Shop
 
                 if (Option == OptionBuyProduct)
                 {
+                    Console.WriteLine($"Ваш баланс: {player.CountCoins}")
                     Console.Write("Введите номер товара: ");
                     int NumnerOfProduct = GetNumber();
-                    player.GetProduct(salesman.GiveProduct(NumnerOfProduct));
+                    Product selectedProduct = salesman.GiveProduct(NumnerOfProduct);
+
+                    if (selectedProduct.Price <= player.CountCoins)
+                    {
+                        player.GetProduct(selectedProduct);
+                        player.GiveCoins(selectedProduct.Price);
+                    }
                 }
 
                 if (Option == OptionShowThings)
@@ -133,6 +140,18 @@ namespace Shop
     class Player
     {
         private List<Product> _things = new List<Product>();
+
+        public Player(int countCoins)
+        {
+            CountCoins = countCoins;
+        }
+
+        public int CountCoins { get; private set; }
+
+        public void GiveCoins(int count)
+        {
+            CountCoins -= count;
+        }
 
         public void GetProduct(Product product)
         {
