@@ -13,7 +13,6 @@ namespace ConsoleApp31
             Console.WindowWidth += 10;
             Console.ForegroundColor = ConsoleColor.Yellow;
 
-
             int Lenght = 30;
             int[] Array = new int[30];
             List<int> LocalsMax=new List<int>();
@@ -26,17 +25,15 @@ namespace ConsoleApp31
                 Console.Write(Array[i] + " ");
             }
 
-
-            for (int i = 1; i < Array.Length-1; i++)
-            {
+            for (int i = 1; i < Array.Length-1; i++)            
                 if (Array[i] > Array[i - 1] && Array[i] > Array[i + 1])
-                    LocalsMax.Add(Array[i]);
-            }
+                    LocalsMax.Add(Array[i]);            
+            
             if(Array[0] > Array[1])
                 LocalsMax.Add(Array[0]);
+            
             if (Array[Lenght-1] > Array[Lenght - 2])
                 LocalsMax.Add(Array[Lenght - 1]);
-
 
             Console.Write("\n\nЛокальные максимумы: ");
             foreach (var item in LocalsMax)
@@ -45,10 +42,6 @@ namespace ConsoleApp31
             }
 
             Console.ReadKey(true);
-
-
-
-
         }
     }
 }
