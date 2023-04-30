@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Train
 {
-    class UserUtilits
+    static class UserUtilits
     {
         private static Random random = new Random();
 
@@ -22,7 +22,7 @@ namespace Train
         }
     }
 
-    class Program
+    sealed class Program
     {
         static void Main()
         {
@@ -31,7 +31,7 @@ namespace Train
         }
     }
 
-    class PlanHelper
+    sealed class PlanHelper
     {
         Train train = new Train();
         string placeOfDeparture;
@@ -138,7 +138,7 @@ namespace Train
         }
     }
 
-    class Train
+    sealed class Train
     {
         private List<Van> _vans = new List<Van>();
 
@@ -155,7 +155,7 @@ namespace Train
         }
     }
 
-    class Van
+    sealed class Van
     {
         public Van(int numberOsSeats)
         {
