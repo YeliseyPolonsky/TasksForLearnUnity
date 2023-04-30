@@ -33,9 +33,9 @@ namespace Train
 
     sealed class PlanHelper
     {
-        Train train = new Train();
-        string placeOfDeparture;
-        string placeOfArrival;
+        private Train train = new Train();
+        private string placeOfDeparture;
+        private string placeOfArrival;
 
         private int _minCountPassengers = 0;
         private int _maxCountPassengers = 50000;
