@@ -1,22 +1,31 @@
 using System;
 using System.Collections.Generic;
 
-namespace Train
+namespace IJunior
 {
     static class UserUtilits
     {
-        private static Random random = new Random();
+        static Random random = new Random();
+        public static int GetRandomNumberWithinLimits(int minValue, int maxValue) => random.Next(minValue, maxValue);
 
-        public static int GetRandomNumber(int minValue, int maxValue) => random.Next(minValue, maxValue);
+        public static int GetRandomNumberWithinLimit(int maxValue) => random.Next(0, maxValue);
 
         public static int GetNumber()
         {
             int result = 0;
 
             while (int.TryParse(Console.ReadLine(), out result) == false)
-                Console.Write("Неправильный ввод!, попробуйте еще: ");
+                Console.Write("Неверный формат ввода! Попробуй еще: ");
 
-            Console.WriteLine();
+            return result;
+        }
+
+        public static int GetNumberWithinLimits(int minValue, int maxValue)
+        {
+            int result = 0;
+
+            while (int.TryParse(Console.ReadLine(), out result) == false || result < minValue || result > maxValue)
+                Console.Write("Неверный формат ввода! Попробуй еще: ");
 
             return result;
         }
@@ -26,142 +35,244 @@ namespace Train
     {
         static void Main()
         {
-            PlanHelper planHelper = new PlanHelper();
-            planHelper.StartWork();
+            StationDispatcher stationDispatcher = new StationDispatcher();
+            stationDispatcher.StartWork();
         }
     }
 
-    sealed class PlanHelper
+    sealed class StationDispatcher
     {
-        private Train train = new Train();
-        private string placeOfDeparture;
-        private string placeOfArrival;
-
-        private int _minCountPassengers = 0;
-        private int _maxCountPassengers = 50000;
-
-        private const int MakePlanOption = 1;
-        private const int ExitOption = 2;
-
-        private bool _isWorking = true;
+        private List<Train> _trains = new List<Train>();
+        private TrainBilder _trainBilder = new TrainBilder();
 
         public void StartWork()
         {
-            while (_isWorking)
+            const int WorkOption = 1;
+            const int ExitOption = 2;
+
+            bool isWork = true;
+
+            while (isWork)
             {
-                Console.WriteLine($"{MakePlanOption} - составить план поезда;\n" +
-                                  $"{ExitOption} - выйти из программы;");
+                Console.WriteLine($"{WorkOption} - работать;\n" +
+                                  $"{ExitOption} - закончить работу;");
 
-                Console.Write("Ваш выбор: ");
-
-                switch (UserUtilits.GetNumber())
+                switch (UserUtilits.GetNumberWithinLimits(1, 2))
                 {
-                    case MakePlanOption:
-                        MakePlan();
+                    case WorkOption:
+                        Work();
                         break;
 
                     case ExitOption:
-                        _isWorking = false;
+                        isWork = false;
+                        break;
+                }
+            }
+
+            Console.WriteLine("Нажмите любую клавишу для продолжения.");
+            Console.Clear();
+        }
+
+        private void Work()
+        {
+            IndividualBoxOfficeTrain individualBoxOfficeTrain = new IndividualBoxOfficeTrain();
+
+            int countPassegers = individualBoxOfficeTrain.CountTicketsSold;
+
+            Console.WriteLine($"На поезд хотят сесть {countPassegers}");
+            Train train = _trainBilder.BuildTrain();
+            _trains.Add(train);
+
+            if (train.GetAllNummerOfPlaces() >= countPassegers)
+            {
+                Console.WriteLine($"Успешно");
+                train.Direction.ShowInformation();
+            }
+            else
+                Console.WriteLine("Вы ошиблись.");
+
+        }
+    }
+
+    sealed class IndividualBoxOfficeTrain
+    {
+        private int _maxCountPassegers = 200;
+
+        public IndividualBoxOfficeTrain()
+        {
+            CountTicketsSold = UserUtilits.GetRandomNumberWithinLimit(_maxCountPassegers);
+        }
+
+        public int CountTicketsSold { get; private set; }
+    }
+
+    sealed class DirectionBilder
+    {
+        public Direction BuildDirection()
+        {
+            Console.Write("Введите точку отправления: ");
+            string placeOfDeparture = Console.ReadLine();
+
+            Console.Write("Введите точку прибытия: ");
+            string plaseOfArrival = Console.ReadLine();
+
+            return new Direction(placeOfDeparture, plaseOfArrival);
+        }
+    }
+
+    sealed class TrainBilder
+    {
+        private WagonBilder _wagonBilder = new WagonBilder();
+        private DirectionBilder _directionBilder = new DirectionBilder();
+
+        public Train BuildTrain()
+        {
+            Console.Write("Введите имя поезда: ");
+            string name = Console.ReadLine();
+
+            return new Train(name, GetNewWagons(), _directionBilder.BuildDirection());
+        }
+
+        private List<Wagon> GetNewWagons()
+        {
+            List<Wagon> newWagons = new List<Wagon>();
+
+            const int AddOption = 1;
+            const int FinishOption = 2;
+
+            bool isWork = true;
+
+            while (isWork)
+            {
+                Console.WriteLine($"{AddOption} - добавить вагон;\n" +
+                                  $"{FinishOption} - закончить добавление вагонов;\n");
+
+                switch (UserUtilits.GetNumberWithinLimits(1, 2))
+                {
+                    case AddOption:
+                        newWagons.Add(_wagonBilder.BuildWagon());
                         break;
 
-                    default:
-                        Console.WriteLine("Такой опции не существует!");
+                    case FinishOption:
+                        isWork = false;
                         break;
                 }
 
                 Console.WriteLine("Нажмите любую клавишу для продолжения.");
                 Console.ReadKey();
-                Console.Clear();
             }
+
+            return newWagons;
         }
+    }
 
-        private void MakePlan()
+    sealed class WagonBilder
+    {
+        public Wagon BuildWagon()
         {
-            Console.Write("Место отправления: ");
-            placeOfDeparture = Console.ReadLine();
+            const int miniValueOption = 1;
+            const int averageValueOption = 2;
+            const int maxValueOption = 3;
 
-            Console.Write("Место прибывания: ");
-            placeOfArrival = Console.ReadLine();
+            Console.WriteLine($"{miniValueOption} - создать маленький вагон;\n" +
+                              $"{averageValueOption}- создать средний вагон;\n" +
+                              $"{maxValueOption}- создать большой вагон;\n");
 
-            int countPassegers = UserUtilits.GetRandomNumber(_minCountPassengers, _maxCountPassengers);
-
-            Console.WriteLine($"\n{countPassegers} пассажиров купили билеты на это направление");
-
-            CreateTrain();
-
-            if (countPassegers <= train.GetCountPlaces())
-                Console.WriteLine($"Кроссавчик на всех хватило мест, поезд отправляется, точка отправления - {placeOfDeparture}, точка прибытия  -{placeOfArrival}");
-            else
-                Console.WriteLine("Некоторым пассажирам не хватило мест. Вам строгий выговор!");
-
-            train = new Train();
-        }
-
-        private void CreateTrain()
-        {
-            const int AddVan = 1;
-            const int FinishCreating = 2;
-
-            Console.WriteLine("\nТеперь создадим поезд:");
-
-            bool isCreating = true;
-
-            while (isCreating)
+            switch (UserUtilits.GetNumberWithinLimits(1, 3))
             {
-                Console.WriteLine($"{AddVan} - добавить вагон\n" +
-                              $"{FinishCreating} - завершить создание поезда");
-                Console.Write("Ваш выбор: ");
+                case miniValueOption:
+                    return new MiniWagon();
 
-                switch (UserUtilits.GetNumber())
-                {
-                    case AddVan:
-                        this.AddVan();
-                        break;
+                case averageValueOption:
+                    return new AverageWagon();
 
-                    case FinishCreating:
-                        isCreating = false;
-                        break;
+                case maxValueOption:
+                    return new MaxWagon();
 
-                    default:
-                        Console.WriteLine("Такой опции не существует!");
-                        break;
-                }
-
-                Console.WriteLine("Успешно).\n");
+                default:
+                    Console.WriteLine("Ошибка!");
+                    return null;
             }
-        }
-
-        private void AddVan()
-        {
-            Console.Write("Колличество мест: ");
-            train.AddVan(new Van(UserUtilits.GetNumber()));
         }
     }
 
     sealed class Train
     {
-        private List<Van> _vans = new List<Van>();
+        private string Name;
+        private List<Wagon> _wagons = new List<Wagon>();
 
-        public void AddVan(Van van) => _vans.Add(van);
-
-        public int GetCountPlaces()
+        public Train(string name, List<Wagon> wagons, Direction direction)
         {
-            int count = 0;
+            Name = name;
+            Direction = direction;
 
-            foreach (Van van in _vans)
-                count += van.NumberOfSeats;
+            foreach (Wagon wagon in wagons)
+                _wagons.Add(wagon);
+        }
 
-            return count;
+        public Direction Direction { get; private set; }
+
+        public int GetAllNummerOfPlaces()
+        {
+            int result = 0;
+
+            foreach (Wagon wagon in _wagons)
+                result += wagon.Compatibility;
+
+            return result;
         }
     }
 
-    sealed class Van
+    sealed class Direction
     {
-        public Van(int numberOsSeats)
+        public Direction(string placeOfDeparture, string placeOfArrival)
         {
-            NumberOfSeats = numberOsSeats;
+            PlaceOfArrival = placeOfArrival;
+            PlaceOfDeparture = placeOfDeparture;
         }
 
-        public int NumberOfSeats { get; private set; }
+        public string PlaceOfDeparture { get; private set; }
+
+        public string PlaceOfArrival { get; private set; }
+
+        public void ShowInformation()
+        {
+            Console.WriteLine($"Точка отправки - {PlaceOfDeparture}, точка прибытия  - {PlaceOfArrival}");
+        }
+    }
+
+    abstract class Wagon
+    {
+        public int Compatibility { get; protected set; }
+    }
+
+    sealed class MiniWagon : Wagon
+    {
+        private int _maximumNumberOfPlaces = 10;
+
+        public MiniWagon()
+        {
+            Compatibility = _maximumNumberOfPlaces;
+        }
+    }
+
+    sealed class AverageWagon : Wagon
+    {
+        private int _maximumNumberOfPlaces = 30;
+
+        public AverageWagon()
+        {
+            Compatibility = _maximumNumberOfPlaces;
+        }
+    }
+
+    sealed class MaxWagon : Wagon
+    {
+        private int _maximumNumberOfPlaces = 50;
+
+        public MaxWagon()
+        {
+            Compatibility = _maximumNumberOfPlaces;
+        }
     }
 }
