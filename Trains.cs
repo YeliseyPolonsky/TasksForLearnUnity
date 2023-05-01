@@ -6,6 +6,7 @@ namespace IJunior
     static class UserUtilits
     {
         static Random random = new Random();
+
         public static int GetRandomNumberWithinLimits(int minValue, int maxValue) => random.Next(minValue, maxValue);
 
         public static int GetRandomNumberWithinLimit(int maxValue) => random.Next(0, maxValue);
