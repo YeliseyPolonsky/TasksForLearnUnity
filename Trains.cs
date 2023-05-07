@@ -5,11 +5,9 @@ namespace IJunior
 {
     static class UserUtilits
     {
-        static Random random = new Random();
+        private static Random _random = new Random();
 
-        public static int GetRandomNumberWithinLimits(int minValue, int maxValue) => random.Next(minValue, maxValue);
-
-        public static int GetRandomNumberWithinLimit(int maxValue) => random.Next(0, maxValue);
+        public static int GetRandomNumberWithinLimit(int maxValue) => _random.Next(maxValue);
 
         public static int GetNumber()
         {
@@ -36,29 +34,36 @@ namespace IJunior
     {
         static void Main()
         {
-            StationDispatcher stationDispatcher = new StationDispatcher();
+            Logist stationDispatcher = new Logist();
             stationDispatcher.StartWork();
         }
     }
 
-    sealed class StationDispatcher
+    sealed class Logist
     {
-        private List<Train> _trains = new List<Train>();
         private TrainBilder _trainBilder = new TrainBilder();
+        private DirectionBilder _directionBilder = new DirectionBilder();
+        private List<string> _flightInformation = new List<string>();
+        private Depot _depot = new Depot();
 
         public void StartWork()
         {
             const int WorkOption = 1;
             const int ExitOption = 2;
+            const int ShowFlightInformation = 3;
+
+            const int MinimumNumberOfOptions = WorkOption;
+            const int MaximumNumberOfOptions = ShowFlightInformation;
 
             bool isWork = true;
 
             while (isWork)
             {
-                Console.WriteLine($"{WorkOption} - работать;\n" +
-                                  $"{ExitOption} - закончить работу;");
+                Console.WriteLine($"{WorkOption} - работать над новым рейсом;\n" +
+                                  $"{ExitOption} - закончить работу;\n" +
+                                  $"{ShowFlightInformation} - показать информацию о рейсах;");
 
-                switch (UserUtilits.GetNumberWithinLimits(1, 2))
+                switch (UserUtilits.GetNumberWithinLimits(MinimumNumberOfOptions, MaximumNumberOfOptions))
                 {
                     case WorkOption:
                         Work();
@@ -66,6 +71,10 @@ namespace IJunior
 
                     case ExitOption:
                         isWork = false;
+                        break;
+
+                    case ShowFlightInformation:
+                        this.ShowFlightInformation();
                         break;
                 }
             }
@@ -76,40 +85,69 @@ namespace IJunior
 
         private void Work()
         {
-            IndividualBoxOfficeTrain individualBoxOfficeTrain = new IndividualBoxOfficeTrain();
+            Direction newDirection = _directionBilder.Create();
+            CashRegister cashRegister = new CashRegister(newDirection);
 
-            int countPassegers = individualBoxOfficeTrain.CountTicketsSold;
-
+            int countPassegers = cashRegister.CountTicketsSold;
             Console.WriteLine($"На поезд хотят сесть {countPassegers}");
-            Train train = _trainBilder.BuildTrain();
-            _trains.Add(train);
 
-            if (train.GetAllNummerOfPlaces() >= countPassegers)
-            {
-                Console.WriteLine($"Успешно");
-                train.Direction.ShowInformation();
-            }
+            Train train = _trainBilder.Create(newDirection);
+            _depot.AddTrain(train);
+            _flightInformation = _depot.GetInfornationAboutAllTrais();
+
+            if (train.GetAllSeats() >= countPassegers)
+                Console.WriteLine($"Успешно {train.Number} {train.Direction.GetInformation()}");
             else
                 Console.WriteLine("Вы ошиблись.");
+        }
 
+        private void ShowFlightInformation()
+        {
+            foreach (string singleFlightInformation in _flightInformation)
+                Console.WriteLine(singleFlightInformation);
         }
     }
 
-    sealed class IndividualBoxOfficeTrain
+    sealed class Depot
+    {
+        private List<Train> _trains = new List<Train>();
+
+        public void AddTrain(Train train)
+        {
+            _trains.Add(train);
+        }
+
+        public List<string> GetInfornationAboutAllTrais()
+        {
+            List<string> listInformation = new List<string>();
+
+            foreach (Train train in _trains)
+            {
+                listInformation.Add($"{train.Number} {train.Direction.GetInformation()}");
+            }
+
+            return listInformation;
+        }
+    }
+
+    sealed class CashRegister
     {
         private int _maxCountPassegers = 200;
 
-        public IndividualBoxOfficeTrain()
+        public CashRegister(Direction direction)
         {
             CountTicketsSold = UserUtilits.GetRandomNumberWithinLimit(_maxCountPassegers);
+            Direction = direction;
         }
+
+        public Direction Direction { get; private set; }
 
         public int CountTicketsSold { get; private set; }
     }
 
     sealed class DirectionBilder
     {
-        public Direction BuildDirection()
+        public Direction Create()
         {
             Console.Write("Введите точку отправления: ");
             string placeOfDeparture = Console.ReadLine();
@@ -123,23 +161,27 @@ namespace IJunior
 
     sealed class TrainBilder
     {
-        private WagonBilder _wagonBilder = new WagonBilder();
-        private DirectionBilder _directionBilder = new DirectionBilder();
-
-        public Train BuildTrain()
+        public Train Create(Direction direction)
         {
-            Console.Write("Введите имя поезда: ");
-            string name = Console.ReadLine();
+            Console.Write("Введите номер поезда: ");
+            int number = UserUtilits.GetNumber();
 
-            return new Train(name, GetNewWagons(), _directionBilder.BuildDirection());
+            return new Train(number, new WagonCoupling().GetNewWagons(), direction);
         }
+    }
 
-        private List<Wagon> GetNewWagons()
+    sealed class WagonCoupling
+    {
+        public List<Wagon> GetNewWagons()
         {
-            List<Wagon> newWagons = new List<Wagon>();
-
             const int AddOption = 1;
             const int FinishOption = 2;
+
+            const int MinimumNumberOfOptions = AddOption;
+            const int MaximumNumberOfOptions = FinishOption;
+
+            WagonBilder _wagonBilder = new WagonBilder();
+            List<Wagon> wagons = new List<Wagon>();
 
             bool isWork = true;
 
@@ -148,10 +190,10 @@ namespace IJunior
                 Console.WriteLine($"{AddOption} - добавить вагон;\n" +
                                   $"{FinishOption} - закончить добавление вагонов;\n");
 
-                switch (UserUtilits.GetNumberWithinLimits(1, 2))
+                switch (UserUtilits.GetNumberWithinLimits(MinimumNumberOfOptions, MaximumNumberOfOptions))
                 {
                     case AddOption:
-                        newWagons.Add(_wagonBilder.BuildWagon());
+                        wagons.Add(_wagonBilder.Create());
                         break;
 
                     case FinishOption:
@@ -163,23 +205,26 @@ namespace IJunior
                 Console.ReadKey();
             }
 
-            return newWagons;
+            return wagons;
         }
     }
 
     sealed class WagonBilder
     {
-        public Wagon BuildWagon()
+        public Wagon Create()
         {
             const int miniValueOption = 1;
             const int averageValueOption = 2;
             const int maxValueOption = 3;
 
+            const int MinimumNumberOfOptions = miniValueOption;
+            const int MaximumNumberOfOptions = maxValueOption;
+
             Console.WriteLine($"{miniValueOption} - создать маленький вагон;\n" +
                               $"{averageValueOption}- создать средний вагон;\n" +
                               $"{maxValueOption}- создать большой вагон;\n");
 
-            switch (UserUtilits.GetNumberWithinLimits(1, 3))
+            switch (UserUtilits.GetNumberWithinLimits(MinimumNumberOfOptions, MaximumNumberOfOptions))
             {
                 case miniValueOption:
                     return new MiniWagon();
@@ -188,23 +233,21 @@ namespace IJunior
                     return new AverageWagon();
 
                 case maxValueOption:
-                    return new MaxWagon();
-
-                default:
-                    Console.WriteLine("Ошибка!");
-                    return null;
+                    return new BigWagon();
             }
+
+            return null;
         }
     }
 
     sealed class Train
     {
-        private string Name;
+        public int Number { get; private set; }
         private List<Wagon> _wagons = new List<Wagon>();
 
-        public Train(string name, List<Wagon> wagons, Direction direction)
+        public Train(int number, List<Wagon> wagons, Direction direction)
         {
-            Name = name;
+            Number = number;
             Direction = direction;
 
             foreach (Wagon wagon in wagons)
@@ -213,7 +256,7 @@ namespace IJunior
 
         public Direction Direction { get; private set; }
 
-        public int GetAllNummerOfPlaces()
+        public int GetAllSeats()
         {
             int result = 0;
 
@@ -236,9 +279,9 @@ namespace IJunior
 
         public string PlaceOfArrival { get; private set; }
 
-        public void ShowInformation()
+        public string GetInformation()
         {
-            Console.WriteLine($"Точка отправки - {PlaceOfDeparture}, точка прибытия  - {PlaceOfArrival}");
+            return $"Точка отправки - {PlaceOfDeparture}, точка прибытия  - {PlaceOfArrival}";
         }
     }
 
@@ -267,11 +310,11 @@ namespace IJunior
         }
     }
 
-    sealed class MaxWagon : Wagon
+    sealed class BigWagon : Wagon
     {
         private int _maximumNumberOfPlaces = 50;
 
-        public MaxWagon()
+        public BigWagon()
         {
             Compatibility = _maximumNumberOfPlaces;
         }
