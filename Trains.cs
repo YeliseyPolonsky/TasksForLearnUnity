@@ -242,7 +242,6 @@ namespace IJunior
 
     sealed class Train
     {
-        public int Number { get; private set; }
         private List<Wagon> _wagons = new List<Wagon>();
 
         public Train(int number, List<Wagon> wagons, Direction direction)
@@ -255,6 +254,7 @@ namespace IJunior
         }
 
         public Direction Direction { get; private set; }
+        public int Number { get; private set; }
 
         public int GetAllSeats()
         {
