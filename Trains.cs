@@ -34,19 +34,17 @@ namespace IJunior
     {
         static void Main()
         {
-            Logist stationDispatcher = new Logist();
-            stationDispatcher.StartWork();
+            RailwayNetworks railwayNetworks = new RailwayNetworks();
+            railwayNetworks.Start();
         }
     }
 
-    sealed class Logist
+    sealed class RailwayNetworks
     {
-        private TrainBilder _trainBilder = new TrainBilder();
-        private DirectionBilder _directionBilder = new DirectionBilder();
-        private List<string> _flightInformation = new List<string>();
-        private Depot _depot = new Depot();
+        private List<Train> _trainsOnTheRun = new List<Train>();
+        private List<Station> _stations = new List<Station>() { new Station("Ярославский вокзал") };
 
-        public void StartWork()
+        public void Start()
         {
             const int WorkOption = 1;
             const int ExitOption = 2;
@@ -59,7 +57,7 @@ namespace IJunior
 
             while (isWork)
             {
-                Console.WriteLine($"{WorkOption} - работать над новым рейсом;\n" +
+                Console.WriteLine($"{WorkOption} - начать работать;\n" +
                                   $"{ExitOption} - закончить работу;\n" +
                                   $"{ShowFlightInformation} - показать информацию о рейсах;");
 
@@ -77,56 +75,151 @@ namespace IJunior
                         this.ShowFlightInformation();
                         break;
                 }
-            }
 
-            Console.WriteLine("Нажмите любую клавишу для продолжения.");
-            Console.Clear();
+                Console.WriteLine("Нажмите любую клавишу для продолжения.");
+                Console.ReadKey();
+                Console.Clear();
+            }
         }
 
         private void Work()
+        {
+            foreach (Station station in _stations)
+                foreach (Train train in station.Work())
+                    _trainsOnTheRun.Add(train);
+        }
+
+        private void ShowFlightInformation()
+        {
+            foreach (Train train in _trainsOnTheRun)
+            {
+                Console.WriteLine($"Поезд под номером {train.Number} {train.Direction.GetInformation()};");
+            }
+        }
+    }
+
+    sealed class Station
+    {
+        private Logist _logist = new Logist();
+        private TrainBilder _trainBilder = new TrainBilder();
+
+        public Station(string name)
+        {
+            Name = name;
+        }
+
+        public string Name { get; private set; }
+
+        public List<Train> Work()
+        {
+            List<Train> trainsOnTheRun = new List<Train>();
+            Dictionary<Direction, int> newCountPassegersByDirection = _logist.Work(Name);
+
+            if (newCountPassegersByDirection.Count != 0)
+                foreach (var countPassagersByDirection in newCountPassegersByDirection)
+                {
+                    Train newTrain = _trainBilder.Create(countPassagersByDirection.Key);
+
+                    if (newTrain.GetAllSeats() >= countPassagersByDirection.Value)
+                        Console.WriteLine($"Поезд под номером {newTrain.Number} {newTrain.Direction.GetInformation()} успешно отправлен;");
+                    else
+                        Console.WriteLine($"Поезд под номером {newTrain.Number} {newTrain.Direction.GetInformation()} отправлен c ошибкой;");
+
+                    trainsOnTheRun.Add(newTrain);
+                }
+
+            return trainsOnTheRun;
+        }
+    }
+
+
+    sealed class Logist
+    {
+        private DirectionBilder _directionBilder;
+        private Dictionary<Direction, int> _countPassegersByDirection;
+
+        public Logist()
+        {
+            _directionBilder = new DirectionBilder();
+            _countPassegersByDirection = new Dictionary<Direction, int>();
+        }
+
+        public Dictionary<Direction, int> Work(string name)
+        {
+            const int WorkOption = 1;
+            const int ExitOption = 2;
+
+            const int MinimumNumberOfOptions = WorkOption;
+            const int MaximumNumberOfOptions = ExitOption;
+
+            bool isWork = true;
+
+            while (isWork)
+            {
+                Console.WriteLine($"{name}\n" +
+                                  $"{WorkOption} - работать над новым рейсом;\n" +
+                                  $"{ExitOption} - закончить работу;");
+
+                switch (UserUtilits.GetNumberWithinLimits(MinimumNumberOfOptions, MaximumNumberOfOptions))
+                {
+                    case WorkOption:
+                        MakeFlight();
+                        break;
+
+                    case ExitOption:
+                        isWork = false;
+                        break;
+                }
+            }
+
+            Console.WriteLine("Нажмите любую клавишу для продолжения.");
+            Console.ReadKey();
+            Console.Clear();
+
+            return _countPassegersByDirection;
+        }
+
+        private void MakeFlight()
         {
             Direction newDirection = _directionBilder.Create();
             CashRegister cashRegister = new CashRegister(newDirection);
 
             int countPassegers = cashRegister.CountTicketsSold;
-            Console.WriteLine($"На поезд хотят сесть {countPassegers}");
+            Console.WriteLine($"На поезд хотят сесть {countPassegers}\n");
 
-            Train train = _trainBilder.Create(newDirection);
-            _depot.AddTrain(train);
-            _flightInformation = _depot.GetInfornationAboutAllTrais();
-
-            if (train.GetAllSeats() >= countPassegers)
-                Console.WriteLine($"Успешно {train.Number} {train.Direction.GetInformation()}");
-            else
-                Console.WriteLine("Вы ошиблись.");
-        }
-
-        private void ShowFlightInformation()
-        {
-            foreach (string singleFlightInformation in _flightInformation)
-                Console.WriteLine(singleFlightInformation);
+            _countPassegersByDirection.Add(newDirection, countPassegers);
         }
     }
 
-    sealed class Depot
+    sealed class DirectionBilder
     {
-        private List<Train> _trains = new List<Train>();
-
-        public void AddTrain(Train train)
+        public Direction Create()
         {
-            _trains.Add(train);
+            Console.Write("Введите точку отправления: ");
+            string placeOfDeparture = Console.ReadLine();
+
+            Console.Write("Введите точку прибытия: ");
+            string plaseOfArrival = Console.ReadLine();
+
+            return new Direction(placeOfDeparture, plaseOfArrival);
+        }
+    }
+
+    sealed class Direction
+    {
+        public Direction(string placeOfDeparture, string placeOfArrival)
+        {
+            PlaceOfArrival = placeOfArrival;
+            PlaceOfDeparture = placeOfDeparture;
         }
 
-        public List<string> GetInfornationAboutAllTrais()
+        public string PlaceOfDeparture { get; private set; }
+
+        public string PlaceOfArrival { get; private set; }
+
+        public string GetInformation()
         {
-            List<string> listInformation = new List<string>();
-
-            foreach (Train train in _trains)
-            {
-                listInformation.Add($"{train.Number} {train.Direction.GetInformation()}");
-            }
-
-            return listInformation;
+            return $"Точка отправки - {PlaceOfDeparture}, точка прибытия  - {PlaceOfArrival}";
         }
     }
 
@@ -145,28 +238,41 @@ namespace IJunior
         public int CountTicketsSold { get; private set; }
     }
 
-    sealed class DirectionBilder
-    {
-        public Direction Create()
-        {
-            Console.Write("Введите точку отправления: ");
-            string placeOfDeparture = Console.ReadLine();
-
-            Console.Write("Введите точку прибытия: ");
-            string plaseOfArrival = Console.ReadLine();
-
-            return new Direction(placeOfDeparture, plaseOfArrival);
-        }
-    }
-
     sealed class TrainBilder
     {
         public Train Create(Direction direction)
         {
-            Console.Write("Введите номер поезда: ");
+            Console.Write($"Введите номер поезда для направления {direction.GetInformation()}: ");
             int number = UserUtilits.GetNumber();
 
             return new Train(number, new WagonCoupling().GetNewWagons(), direction);
+        }
+    }
+
+    sealed class Train
+    {
+        public int Number { get; private set; }
+        private List<Wagon> _wagons = new List<Wagon>();
+
+        public Train(int number, List<Wagon> wagons, Direction direction)
+        {
+            Number = number;
+            Direction = direction;
+
+            foreach (Wagon wagon in wagons)
+                _wagons.Add(wagon);
+        }
+
+        public Direction Direction { get; private set; }
+
+        public int GetAllSeats()
+        {
+            int result = 0;
+
+            foreach (Wagon wagon in _wagons)
+                result += wagon.Compatibility;
+
+            return result;
         }
     }
 
@@ -237,51 +343,6 @@ namespace IJunior
             }
 
             return null;
-        }
-    }
-
-    sealed class Train
-    {
-        public int Number { get; private set; }
-        private List<Wagon> _wagons = new List<Wagon>();
-
-        public Train(int number, List<Wagon> wagons, Direction direction)
-        {
-            Number = number;
-            Direction = direction;
-
-            foreach (Wagon wagon in wagons)
-                _wagons.Add(wagon);
-        }
-
-        public Direction Direction { get; private set; }
-
-        public int GetAllSeats()
-        {
-            int result = 0;
-
-            foreach (Wagon wagon in _wagons)
-                result += wagon.Compatibility;
-
-            return result;
-        }
-    }
-
-    sealed class Direction
-    {
-        public Direction(string placeOfDeparture, string placeOfArrival)
-        {
-            PlaceOfArrival = placeOfArrival;
-            PlaceOfDeparture = placeOfDeparture;
-        }
-
-        public string PlaceOfDeparture { get; private set; }
-
-        public string PlaceOfArrival { get; private set; }
-
-        public string GetInformation()
-        {
-            return $"Точка отправки - {PlaceOfDeparture}, точка прибытия  - {PlaceOfArrival}";
         }
     }
 
