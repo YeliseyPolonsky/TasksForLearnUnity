@@ -85,7 +85,7 @@ namespace IJunior
         private void Work()
         {
             foreach (Station station in _stations)
-                foreach (Train train in station.Work())
+                foreach (Train train in station.WorkByMakingTrainListsOnFlightFromStation())
                     _trainsOnTheRun.Add(train);
         }
 
@@ -110,10 +110,10 @@ namespace IJunior
 
         public string Name { get; private set; }
 
-        public List<Train> Work()
+        public List<Train> WorkByMakingTrainListsOnFlightFromStation() // понимаю , что максимально убогое название, но емкое, я хотел подчеркнуть что станция именно работает делая списки поездов которые ушли в рейс от этой станции, просто Get я не особо хотел.Не знаю как назвать метод
         {
             List<Train> trainsOnTheRun = new List<Train>();
-            Dictionary<Direction, int> newCountPassegersByDirection = _logist.Work(Name);
+            Dictionary<Direction, int> newCountPassegersByDirection = _logist.WorkByGivingDictionaryOfTrainsToPassengersInDirection(Name);
 
             if (newCountPassegersByDirection.Count != 0)
                 foreach (var countPassagersByDirection in newCountPassegersByDirection)
@@ -136,7 +136,7 @@ namespace IJunior
     sealed class Logist
     {
         private DirectionBilder _directionBilder;
-        private Dictionary<Direction, int> _countPassegersByDirection;
+        private Dictionary<Direction, int> _countPassegersByDirection; //я понимаю ,что мог создать список из экземпляров класса с двумя полями вместо словаря, просто не знал как класс назвать)
 
         public Logist()
         {
@@ -144,7 +144,7 @@ namespace IJunior
             _countPassegersByDirection = new Dictionary<Direction, int>();
         }
 
-        public Dictionary<Direction, int> Work(string name)
+        public Dictionary<Direction, int> WorkByGivingDictionaryOfTrainsToPassengersInDirection(string name) //тоже пздц плохое название, но не могу придумать нормальное
         {
             const int WorkOption = 1;
             const int ExitOption = 2;
@@ -223,7 +223,7 @@ namespace IJunior
         }
     }
 
-    sealed class CashRegister
+    sealed class CashRegister //переводиться как касса, тут у каждого поезда есть мвоя касса
     {
         private int _maxCountPassegers = 200;
 
@@ -276,7 +276,7 @@ namespace IJunior
         }
     }
 
-    sealed class WagonCoupling
+    sealed class WagonCoupling //сцепка вогонов по сути и их создание
     {
         public List<Wagon> GetNewWagons()
         {
@@ -353,7 +353,7 @@ namespace IJunior
 
     sealed class MiniWagon : Wagon
     {
-        private int _maximumNumberOfPlaces = 10;
+        private int _maximumNumberOfPlaces = 10; //здесь ты говорил убрать эти строчки, записав их в класс родителя, но здесь так не получиться , или если и получится то криво по моему внизу написал как
 
         public MiniWagon()
         {
@@ -380,4 +380,46 @@ namespace IJunior
             Compatibility = _maximumNumberOfPlaces;
         }
     }
+
+    //Вот по моему можно только так,при том условии что мы хотим оставить конструктор без параметров
+
+    //abstract class Wagon
+    //{
+    //    public int Compatibility { get; protected set; }
+
+    //    protected int maximumNumberOfPlaces;
+    //}
+
+    //sealed class MiniWagon : Wagon
+    //{
+    //    private int _maximumNumberOfPlaces = 10; 
+
+    //    public MiniWagon()
+    //    {
+    //        Compatibility = _maximumNumberOfPlaces;
+    //        maximumNumberOfPlaces = _maximumNumberOfPlaces;
+    //    }
+    //}
+
+    //sealed class AverageWagon : Wagon
+    //{
+    //    private int _maximumNumberOfPlaces = 30;
+
+    //    public AverageWagon()
+    //    {
+    //        Compatibility = _maximumNumberOfPlaces;
+    //        maximumNumberOfPlaces = _maximumNumberOfPlaces;
+    //    }
+    //}
+
+    //sealed class BigWagon : Wagon
+    //{
+    //    private int _maximumNumberOfPlaces = 50;
+
+    //    public BigWagon()
+    //    {
+    //        Compatibility = _maximumNumberOfPlaces;
+    //        maximumNumberOfPlaces = _maximumNumberOfPlaces;
+    //    }
+    //}
 }
