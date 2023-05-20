@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace IJunior
 {
@@ -7,7 +10,7 @@ namespace IJunior
     {
         private static Random _random = new Random();
 
-        public static int GetRandomNumberWithinLimit(int maxValue) => _random.Next(maxValue);
+        public static int GetRandomNumber(int maxValue) => _random.Next(maxValue);
 
         public static int GetNumber()
         {
@@ -19,7 +22,7 @@ namespace IJunior
             return result;
         }
 
-        public static int GetNumberWithinLimits(int minValue, int maxValue)
+        public static int GetNumber(int minValue, int maxValue)
         {
             int result = 0;
 
@@ -30,165 +33,54 @@ namespace IJunior
         }
     }
 
-    sealed class Program
+    class Program
     {
         static void Main()
         {
-            RailwayNetworks railwayNetworks = new RailwayNetworks();
-            railwayNetworks.Start();
-        }
-    }
-
-    sealed class RailwayNetworks
-    {
-        private List<Train> _trainsOnTheRun = new List<Train>();
-        private List<Station> _stations = new List<Station>() { new Station("Ярославский вокзал") };
-
-        public void Start()
-        {
-            const int WorkOption = 1;
-            const int ExitOption = 2;
-            const int ShowFlightInformation = 3;
-
-            const int MinimumNumberOfOptions = WorkOption;
-            const int MaximumNumberOfOptions = ShowFlightInformation;
-
-            bool isWork = true;
-
-            while (isWork)
-            {
-                Console.WriteLine($"{WorkOption} - начать работать;\n" +
-                                  $"{ExitOption} - закончить работу;\n" +
-                                  $"{ShowFlightInformation} - показать информацию о рейсах;");
-
-                switch (UserUtilits.GetNumberWithinLimits(MinimumNumberOfOptions, MaximumNumberOfOptions))
-                {
-                    case WorkOption:
-                        Work();
-                        break;
-
-                    case ExitOption:
-                        isWork = false;
-                        break;
-
-                    case ShowFlightInformation:
-                        this.ShowFlightInformation();
-                        break;
-                }
-
-                Console.WriteLine("Нажмите любую клавишу для продолжения.");
-                Console.ReadKey();
-                Console.Clear();
-            }
-        }
-
-        private void Work()
-        {
-            foreach (Station station in _stations)
-                foreach (Train train in station.WorkByMakingTrainListsOnFlightFromStation())
-                    _trainsOnTheRun.Add(train);
-        }
-
-        private void ShowFlightInformation()
-        {
-            foreach (Train train in _trainsOnTheRun)
-            {
-                Console.WriteLine($"Поезд под номером {train.Number} {train.Direction.GetInformation()};");
-            }
         }
     }
 
     sealed class Station
     {
-        private Logist _logist = new Logist();
-        private TrainBilder _trainBilder = new TrainBilder();
+        private List<FlightInformation> _flightsInformation = new List<FlightInformation>();
 
-        public Station(string name)
+        public Station(string name, string cityName)
         {
             Name = name;
+            CityName = cityName;
         }
 
-        public string Name { get; private set; }
+        public String Name { get; }
 
-        public List<Train> WorkByMakingTrainListsOnFlightFromStation() // понимаю , что максимально убогое название, но емкое, я хотел подчеркнуть что станция именно работает делая списки поездов которые ушли в рейс от этой станции, просто Get я не особо хотел.Не знаю как назвать метод
+        public string CityName { get; }
+
+        public void SendTrain(Train train)
         {
-            List<Train> trainsOnTheRun = new List<Train>();
-            Dictionary<Direction, int> newCountPassegersByDirection = _logist.WorkByGivingDictionaryOfTrainsToPassengersInDirection(Name);
 
-            if (newCountPassegersByDirection.Count != 0)
-                foreach (var countPassagersByDirection in newCountPassegersByDirection)
-                {
-                    Train newTrain = _trainBilder.Create(countPassagersByDirection.Key);
+        }
 
-                    if (newTrain.GetAllSeats() >= countPassagersByDirection.Value)
-                        Console.WriteLine($"Поезд под номером {newTrain.Number} {newTrain.Direction.GetInformation()} успешно отправлен;");
-                    else
-                        Console.WriteLine($"Поезд под номером {newTrain.Number} {newTrain.Direction.GetInformation()} отправлен c ошибкой;");
+        public List<FlightInformation> GetFlightsInformation()
+        {
+            List<FlightInformation> flightInformation = new List<FlightInformation>();
 
-                    trainsOnTheRun.Add(newTrain);
-                }
+            foreach (FlightInformation singleFlightInformation in _flightsInformation)
+                flightInformation.Add(singleFlightInformation);
 
-            return trainsOnTheRun;
+            return flightInformation;
         }
     }
 
-
-    sealed class Logist
+    sealed class FlightInformation
     {
-        private DirectionBilder _directionBilder;
-        private Dictionary<Direction, int> _countPassegersByDirection; //я понимаю ,что мог создать список из экземпляров класса с двумя полями вместо словаря, просто не знал как класс назвать)
-
-        public Logist()
+        public FlightInformation(Train train)
         {
-            _directionBilder = new DirectionBilder();
-            _countPassegersByDirection = new Dictionary<Direction, int>();
+            NumberOfTrain = train.Number;
+            NameOfDirection = train.Direction.GetInformation();
         }
 
-        public Dictionary<Direction, int> WorkByGivingDictionaryOfTrainsToPassengersInDirection(string name) //тоже пздц плохое название, но не могу придумать нормальное
-        {
-            const int WorkOption = 1;
-            const int ExitOption = 2;
+        public int NumberOfTrain { get; }
 
-            const int MinimumNumberOfOptions = WorkOption;
-            const int MaximumNumberOfOptions = ExitOption;
-
-            bool isWork = true;
-
-            while (isWork)
-            {
-                Console.WriteLine($"{name}\n" +
-                                  $"{WorkOption} - работать над новым рейсом;\n" +
-                                  $"{ExitOption} - закончить работу;");
-
-                switch (UserUtilits.GetNumberWithinLimits(MinimumNumberOfOptions, MaximumNumberOfOptions))
-                {
-                    case WorkOption:
-                        MakeFlight();
-                        break;
-
-                    case ExitOption:
-                        isWork = false;
-                        break;
-                }
-            }
-
-            Console.WriteLine("Нажмите любую клавишу для продолжения.");
-            Console.ReadKey();
-            Console.Clear();
-
-            return _countPassegersByDirection;
-        }
-
-        private void MakeFlight()
-        {
-            Direction newDirection = _directionBilder.Create();
-            CashRegister cashRegister = new CashRegister(newDirection);
-
-            int countPassegers = cashRegister.CountTicketsSold;
-            Console.WriteLine($"На поезд хотят сесть {countPassegers}\n");
-
-            _countPassegersByDirection.Add(newDirection, countPassegers);
-        }
+        public string NameOfDirection { get; }
     }
 
     sealed class DirectionBilder
@@ -223,62 +115,20 @@ namespace IJunior
         }
     }
 
-    sealed class CashRegister //переводиться как касса, тут у каждого поезда есть мвоя касса
-    {
-        private int _maxCountPassegers = 200;
-
-        public CashRegister(Direction direction)
-        {
-            CountTicketsSold = UserUtilits.GetRandomNumberWithinLimit(_maxCountPassegers);
-            Direction = direction;
-        }
-
-        public Direction Direction { get; private set; }
-
-        public int CountTicketsSold { get; private set; }
-    }
-
     sealed class TrainBilder
     {
-        public Train Create(Direction direction)
+        public Train Create()
         {
-            Console.Write($"Введите номер поезда для направления {direction.GetInformation()}: ");
+            Console.Write("Введите номер нового поезда: ");
             int number = UserUtilits.GetNumber();
 
-            return new Train(number, new WagonCoupling().GetNewWagons(), direction);
+            return new Train(number, new WagonCoupling().GetWagons());
         }
     }
 
-    sealed class Train
+    sealed class WagonCoupling
     {
-        public int Number { get; private set; }
-        private List<Wagon> _wagons = new List<Wagon>();
-
-        public Train(int number, List<Wagon> wagons, Direction direction)
-        {
-            Number = number;
-            Direction = direction;
-
-            foreach (Wagon wagon in wagons)
-                _wagons.Add(wagon);
-        }
-
-        public Direction Direction { get; private set; }
-
-        public int GetAllSeats()
-        {
-            int result = 0;
-
-            foreach (Wagon wagon in _wagons)
-                result += wagon.Compatibility;
-
-            return result;
-        }
-    }
-
-    sealed class WagonCoupling //сцепка вогонов по сути и их создание
-    {
-        public List<Wagon> GetNewWagons()
+        public List<Wagon> GetWagons()
         {
             const int AddOption = 1;
             const int FinishOption = 2;
@@ -296,7 +146,7 @@ namespace IJunior
                 Console.WriteLine($"{AddOption} - добавить вагон;\n" +
                                   $"{FinishOption} - закончить добавление вагонов;\n");
 
-                switch (UserUtilits.GetNumberWithinLimits(MinimumNumberOfOptions, MaximumNumberOfOptions))
+                switch (UserUtilits.GetNumber(MinimumNumberOfOptions, MaximumNumberOfOptions))
                 {
                     case AddOption:
                         wagons.Add(_wagonBilder.Create());
@@ -330,7 +180,7 @@ namespace IJunior
                               $"{averageValueOption}- создать средний вагон;\n" +
                               $"{maxValueOption}- создать большой вагон;\n");
 
-            switch (UserUtilits.GetNumberWithinLimits(MinimumNumberOfOptions, MaximumNumberOfOptions))
+            switch (UserUtilits.GetNumber(MinimumNumberOfOptions, MaximumNumberOfOptions))
             {
                 case miniValueOption:
                     return new MiniWagon();
@@ -346,6 +196,33 @@ namespace IJunior
         }
     }
 
+    sealed class Train
+    {
+        private List<Wagon> _wagons = new List<Wagon>();
+
+        public Train(int number, List<Wagon> wagons)
+        {
+            Number = number;
+
+            foreach (Wagon wagon in wagons)
+                _wagons.Add(wagon);
+        }
+
+        public int Number { get; private set; }
+
+        public Direction Direction { get; private set; }
+
+        public int GetAllSeats()
+        {
+            int result = 0;
+
+            foreach (Wagon wagon in _wagons)
+                result += wagon.Compatibility;
+
+            return result;
+        }
+    }
+
     abstract class Wagon
     {
         public int Compatibility { get; protected set; }
@@ -353,7 +230,7 @@ namespace IJunior
 
     sealed class MiniWagon : Wagon
     {
-        private int _maximumNumberOfPlaces = 10; //здесь ты говорил убрать эти строчки, записав их в класс родителя, но здесь так не получиться , или если и получится то криво по моему внизу написал как
+        private int _maximumNumberOfPlaces = 10;
 
         public MiniWagon()
         {
@@ -380,46 +257,4 @@ namespace IJunior
             Compatibility = _maximumNumberOfPlaces;
         }
     }
-
-    //Вот по моему можно только так,при том условии что мы хотим оставить конструктор без параметров
-
-    //abstract class Wagon
-    //{
-    //    public int Compatibility { get; protected set; }
-
-    //    protected int maximumNumberOfPlaces;
-    //}
-
-    //sealed class MiniWagon : Wagon
-    //{
-    //    private int _maximumNumberOfPlaces = 10; 
-
-    //    public MiniWagon()
-    //    {
-    //        Compatibility = _maximumNumberOfPlaces;
-    //        maximumNumberOfPlaces = _maximumNumberOfPlaces;
-    //    }
-    //}
-
-    //sealed class AverageWagon : Wagon
-    //{
-    //    private int _maximumNumberOfPlaces = 30;
-
-    //    public AverageWagon()
-    //    {
-    //        Compatibility = _maximumNumberOfPlaces;
-    //        maximumNumberOfPlaces = _maximumNumberOfPlaces;
-    //    }
-    //}
-
-    //sealed class BigWagon : Wagon
-    //{
-    //    private int _maximumNumberOfPlaces = 50;
-
-    //    public BigWagon()
-    //    {
-    //        Compatibility = _maximumNumberOfPlaces;
-    //        maximumNumberOfPlaces = _maximumNumberOfPlaces;
-    //    }
-    //}
 }
