@@ -7,7 +7,7 @@ namespace IJunior
     {
         private static Random _random = new Random();
 
-        public static int GetRandomNumber(int maxValue) => _random.Next(maxValue);
+        public static int GetRandomNumber(int maxValue) => _random.Next(++maxValue);
 
         public static int GetNumber()
         {
@@ -34,8 +34,7 @@ namespace IJunior
     {
         static void Main()
         {
-            RailwayNetworks railwayNetworks = new RailwayNetworks();
-            railwayNetworks.Work();
+            new RailwayNetworks().Work();
         }
     }
 
@@ -97,7 +96,8 @@ namespace IJunior
 
     sealed class Station
     {
-        private StationInformator _stationInformator = new StationInformator(null);
+        private StationInformator _stationInformator;
+
         private Hangar _hangar = new Hangar();
         private Logist _logist = new Logist();
 
@@ -115,8 +115,7 @@ namespace IJunior
         public Train Work()
         {
             Direction direction;
-            Train train = _hangar.CreateTrain(_logist.Work(_stationInformator.GetInformation(out direction)));
-            train.Direction = direction;
+            Train train = _hangar.CreateTrain(_logist.Work(_stationInformator.GetInformation(out direction)), direction);
 
             return train;
         }
@@ -125,7 +124,6 @@ namespace IJunior
     sealed class StationInformator
     {
         private string _nameOfCity;
-        private CashRegister _cashRegister;
 
         public StationInformator(string nameOfCity)
         {
@@ -135,7 +133,7 @@ namespace IJunior
         public int GetInformation(out Direction direction)
         {
             direction = new Direction(_nameOfCity, Direction.GetRandomNameOfCityExcept(_nameOfCity));
-            _cashRegister = new CashRegister(direction);
+            CashRegister _cashRegister = new CashRegister(direction);
 
             int countPassagers = _cashRegister.CountTicketsSold;
 
@@ -162,11 +160,12 @@ namespace IJunior
 
     sealed class Hangar
     {
-        TrainBilder _trainBilder = new TrainBilder();
-
-        public Train CreateTrain(WagonsInformation wagonsInformation)
+        public Train CreateTrain(WagonsInformation wagonsInformation, Direction direction)
         {
-            return _trainBilder.Create(wagonsInformation);
+            TrainBilder _trainBilder = new TrainBilder();
+            Train train = _trainBilder.Create(wagonsInformation, direction);
+
+            return train;
         }
     }
 
@@ -188,9 +187,9 @@ namespace IJunior
 
             while (countPassagers > countOfSeats)
             {
-                bool isWork = true;
+                bool isWorking = true;
 
-                while (isWork)
+                while (isWorking)
                 {
                     Console.WriteLine($"{AddOption} - спроектировать пасадочные места еще одного вагона;\n" +
                                       $"{FinishOption} - закончить добавление вагонов;\n");
@@ -202,7 +201,7 @@ namespace IJunior
                             break;
 
                         case FinishOption:
-                            isWork = false;
+                            isWorking = false;
                             break;
                     }
 
@@ -220,7 +219,6 @@ namespace IJunior
                 else
                 {
                     Console.WriteLine("Кроссавчик!! для всех хватило мест.");
-                    break;
                 }
             }
 
@@ -327,12 +325,12 @@ namespace IJunior
 
     sealed class TrainBilder
     {
-        public Train Create(WagonsInformation wagonsInformation)
+        public Train Create(WagonsInformation wagonsInformation, Direction direction)
         {
             Console.Write("Введите номер нового поезда: ");
             int number = UserUtilits.GetNumber();
 
-            return new Train(number, new WagonCoupling().GetWagons(wagonsInformation));
+            return new Train(number, new WagonCoupling().GetWagons(wagonsInformation), direction);
         }
     }
 
@@ -361,7 +359,7 @@ namespace IJunior
     {
         private List<Wagon> _wagons = new List<Wagon>();
 
-        public Train(int number, List<Wagon> wagons)
+        public Train(int number, List<Wagon> wagons, Direction direction)
         {
             Number = number;
 
@@ -371,17 +369,7 @@ namespace IJunior
 
         public int Number { get; private set; }
 
-        public Direction Direction { get; set; }
-
-        public int GetAllSeats()
-        {
-            int result = 0;
-
-            foreach (Wagon wagon in _wagons)
-                result += wagon.Compatibility;
-
-            return result;
-        }
+        public Direction Direction { get; }
     }
 
     abstract class Wagon
@@ -410,7 +398,7 @@ namespace IJunior
         public AverageWagon()
         {
             Compatibility = _maximumNumberOfPlaces;
-        }       
+        }
     }
 
     sealed class BigWagon : Wagon
@@ -422,6 +410,6 @@ namespace IJunior
         public BigWagon()
         {
             Compatibility = _maximumNumberOfPlaces;
-        }        
+        }
     }
 }
