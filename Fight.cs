@@ -101,7 +101,7 @@ namespace IJunior
 
     interface IDealDamage
     {
-        int DealDamage();
+        int DealDamage { get; }
     }
 
     delegate void Died();
@@ -135,6 +135,8 @@ namespace IJunior
 
         public string GetHealthInformation => _health.ToString();
 
+        public int DealDamage => _force;
+
         private void DisplayDiedInformation()
         {
             Console.WriteLine($"Маг погиб!");
@@ -144,11 +146,6 @@ namespace IJunior
         {
             Health -= damage;
             this.Regeneration();
-        }
-
-        public int DealDamage()
-        {
-            return _force;
         }
 
         private void Regeneration()
@@ -187,6 +184,8 @@ namespace IJunior
 
         public string GetHealthInformation => _health.ToString();
 
+        public int DealDamage => _force;
+
         private void DisplayDiedInformation()
         {
             Console.WriteLine($"Самурай погиб смертью храбрых!");
@@ -198,12 +197,7 @@ namespace IJunior
                 Health -= damage;
             else
                 Console.WriteLine("Самурай смог уклониться!)");
-        }
-
-        public int DealDamage()
-        {
-            return _force;
-        }
+        }       
 
         private bool TryDodge()
         {
