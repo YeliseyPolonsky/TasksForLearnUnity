@@ -3,58 +3,128 @@ using System.Collections.Generic;
 
 namespace IJunior
 {
-    class Fighting
+    static class UserUtilits
     {
-        private static bool _isFighterDied = false;
+        public static int GetNumber(int minValue, int maxValue)
+        {
+            int result = 0;
+            bool isWork = true;
 
+            while (isWork)
+            {
+                Console.Write("Введите ваше число: ");
+
+                if (int.TryParse(Console.ReadLine(), out result))
+                {
+                    if (result >= minValue && result <= maxValue)
+                    {
+                        Console.WriteLine($"Успешно принято {result}");
+                        isWork = false;
+                    }
+                    else
+                        Console.WriteLine($"Данное число не входит в диапозон {minValue} -- {maxValue}");
+                }
+                else
+                {
+                    Console.WriteLine("Вы ввели некоректное значение! Попробуйте еще раз.");
+                }
+            }
+
+            return result;
+        }
+    }
+
+    class Program
+    {
         static void Main(string[] args)
         {
-            List<IFighter> fighters = new List<IFighter> { new Magician(), new Samurai() };
+            new Arena().Work();
+        }
+    }
 
-            Console.WriteLine("Выбирем первого бойца!");
-            IFighter firstFighter = GetFighterByName(fighters);
+    class Arena
+    {
+        private List<IFighter> _fighters = new List<IFighter> { new Magician(), new Samurai() };
+
+        public void Work()
+        {
+            Console.WriteLine("Добро пожаловать на Арену!!!");
+
+            bool isWorking = true;
+
+            while (isWorking)
+            {
+                const int PlayMode = 1;
+                const int ExitOption = 2;
+
+                const int minValueOfOptions = PlayMode;
+                const int maxValueOfOptions = ExitOption;
+
+                Console.WriteLine($"{PlayMode} - начать игру;\n" +
+                                  $"{ExitOption} - выйти;\n");
+
+                switch (UserUtilits.GetNumber(minValueOfOptions, maxValueOfOptions))
+                {
+                    case PlayMode:
+                        this.StartFight();
+                        break;
+
+                    case ExitOption:
+                        isWorking = false;
+                        break;
+                }
+            }
+        }
+
+        private void StartFight()
+        {
+            Console.WriteLine("\nВыбирем первого бойца!");
+            IFighter firstFighter = GetFighterByName(_fighters);
 
             Console.WriteLine("\nВыбирем второго бойца!");
-            IFighter secondFighter = GetFighterByName(fighters);
+            IFighter secondFighter = GetFighterByName(_fighters);
 
             Fight(firstFighter, secondFighter);
+
+            Console.WriteLine("Бой окончен!");
+            Console.ReadKey();
         }
 
-        public static void FinishFight()
+        private void Fight(IFighter firstFighter, IFighter secondFighter)
         {
-            _isFighterDied = true;
-        }
+            Console.WriteLine("\nБой начался!\n");
 
-        private static void Fight(IFighter firstFighter, IFighter secondFighter)
-        {
             bool isFighting = true;
 
             while (isFighting)
             {
-                Console.WriteLine($"{firstFighter.Name} : здоровье {firstFighter.GetHealthInformation}\n");
-                Console.WriteLine($"{secondFighter.Name} : здоровье {secondFighter.GetHealthInformation}\n");
+                Console.WriteLine($"{firstFighter.Name} : здоровье {firstFighter.GetHealthInformation}\n" +
+                              $"{secondFighter.Name} : здоровье {secondFighter.GetHealthInformation}\n");
                 Console.ReadKey();
                 SigleHit();
-
-                if (_isFighterDied)
-                    isFighting = false;
             }
 
             void SigleHit()
             {
-                secondFighter.GetDamage(firstFighter.DealDamage());
+                secondFighter.GetDamage(firstFighter.DealDamage);
 
-                if (_isFighterDied)
+                if (secondFighter.GetHealthInformation <= 0)
+                {
                     Console.WriteLine($"Победил первый боей {firstFighter.Name}");
+                    isFighting = false;
+                }
 
-                firstFighter.GetDamage(secondFighter.DealDamage());
+                firstFighter.GetDamage(secondFighter.DealDamage);
 
-                if (_isFighterDied)
+                if (firstFighter.GetHealthInformation <= 0)
+                {
                     Console.WriteLine($"Победил второй боей {secondFighter.Name}");
+                    isFighting = false;
+                }
             }
         }
 
-        private static IFighter GetFighterByName(List<IFighter> fighters)
+        private IFighter GetFighterByName(List<IFighter> fighters)
         {
             bool isWorkig = true;
             IFighter resultFighter = null;
@@ -81,7 +151,7 @@ namespace IJunior
                 }
 
                 if (resultFighter == null)
-                    Console.WriteLine("Бойца с тааким именем не существует, попробуй еще раз.");
+                    Console.WriteLine("Бойца с таким именем не существует, попробуй еще раз.");
             }
 
             return resultFighter;
@@ -91,7 +161,7 @@ namespace IJunior
     interface IFighter : IDamagable, IDealDamage
     {
         string Name { get; }
-        string GetHealthInformation { get; }
+        int GetHealthInformation { get; }
     }
 
     interface IDamagable
@@ -104,19 +174,22 @@ namespace IJunior
         int DealDamage { get; }
     }
 
-    delegate void Died();
+    class Weapon
+    {
+        public Weapon(int damage, string name)
+        {
+            Damage = damage;
+            Name = name;
+        }
+
+        public int Damage { get; }
+        public string Name { get; }
+    }
 
     class Magician : IFighter
     {
-        private int _health = 140;
-        private Died _died;
-        private int _force = 10;
-
-        public Magician()
-        {
-            _died = DisplayDiedInformation;
-            _died += Fighting.FinishFight;
-        }
+        private int _health = 90;
+        private Weapon _weapon = new Weapon(15, "волшебный шар");
 
         public int Health
         {
@@ -127,20 +200,17 @@ namespace IJunior
                 _health = value;
 
                 if (_health <= 0)
-                    _died?.Invoke();
+                    this.DisplayDiedInformation();
             }
         }
 
         public string Name { get; } = "Маг";
 
-        public string GetHealthInformation => _health.ToString();
+        public int GetHealthInformation => _health;
 
-        public int DealDamage => _force;
+        public int DealDamage => _weapon.Damage;
 
-        private void DisplayDiedInformation()
-        {
-            Console.WriteLine($"Маг погиб!");
-        }
+        private void DisplayDiedInformation() => Console.WriteLine($"Маг погиб!");
 
         public void GetDamage(int damage)
         {
@@ -150,22 +220,17 @@ namespace IJunior
 
         private void Regeneration()
         {
-            const int amountOfAddedHealth = 5;
-            Health += amountOfAddedHealth;
+            const int amountOfAddedHealth = 10;
+
+            if (_health > 0)
+                Health += amountOfAddedHealth;
         }
     }
 
     class Samurai : IFighter
     {
         private int _health = 140;
-        private Died _died;
-        private int _force = 25;
-
-        public Samurai()
-        {
-            _died = DisplayDiedInformation;
-            _died += Fighting.FinishFight;
-        }
+        private Weapon _weapon = new Weapon(20, "меч");
 
         public int Health
         {
@@ -176,20 +241,17 @@ namespace IJunior
                 _health = value;
 
                 if (_health <= 0)
-                    _died?.Invoke();
+                    this.DisplayDiedInformation();
             }
         }
 
         public string Name { get; } = "Самурай";
 
-        public string GetHealthInformation => _health.ToString();
+        public int GetHealthInformation => _health;
 
-        public int DealDamage => _force;
+        public int DealDamage => _weapon.Damage;
 
-        private void DisplayDiedInformation()
-        {
-            Console.WriteLine($"Самурай погиб смертью храбрых!");
-        }
+        private void DisplayDiedInformation() => Console.WriteLine($"Самурай погиб смертью храбрых!");
 
         public void GetDamage(int damage)
         {
@@ -197,7 +259,7 @@ namespace IJunior
                 Health -= damage;
             else
                 Console.WriteLine("Самурай смог уклониться!)");
-        }       
+        }
 
         private bool TryDodge()
         {
