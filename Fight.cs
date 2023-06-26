@@ -108,8 +108,6 @@ namespace IJunior
 
     class Magician : IFighter
     {
-        public string Name { get; } = "Маг";
-
         private int _health = 140;
         private Died _died;
         private int _force = 10;
@@ -132,6 +130,8 @@ namespace IJunior
                     _died?.Invoke();
             }
         }
+
+        public string Name { get; } = "Маг";
 
         public string GetHealthInformation => _health.ToString();
 
@@ -160,8 +160,6 @@ namespace IJunior
 
     class Samurai : IFighter
     {
-        public string Name { get; } = "Самурай";
-
         private int _health = 140;
         private Died _died;
         private int _force = 25;
@@ -184,6 +182,8 @@ namespace IJunior
                     _died?.Invoke();
             }
         }
+
+        public string Name { get; } = "Самурай";
 
         public string GetHealthInformation => _health.ToString();
 
