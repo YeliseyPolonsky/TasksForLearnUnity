@@ -12,6 +12,9 @@ namespace IJunior
         {
             const string NameOfFirstFighter = "Маг";
             const string NameOfSecondFighter = "Самурай";
+            const string NameOfThirdFighter = "Варвар";
+            const string NameOfFourthFighter = "Фея";
+            const string NameOfFifthFighter = "Гоблин";
 
             switch (name)
             {
@@ -20,6 +23,15 @@ namespace IJunior
 
                 case NameOfSecondFighter:
                     return new Samurai(WeaponBilder.CreateWeapon("Меч"));
+
+                case NameOfThirdFighter:
+                    return new Barbarian(WeaponBilder.CreateWeapon("Меч"));
+
+                case NameOfFourthFighter:
+                    return new Fairy(WeaponBilder.CreateWeapon("Магия"));
+
+                case NameOfFifthFighter:
+                    return new Goblin(WeaponBilder.CreateWeapon("Меч"));
 
                 default:
                     throw new Exception("Передано несуществующее имя бойца!");
@@ -45,7 +57,7 @@ namespace IJunior
                 _health = value;
 
                 if (_health <= 0)
-                    Console.WriteLine($"Маг погиб!");
+                    Console.WriteLine($"{Name} погиб!");
             }
         }
 
@@ -95,7 +107,7 @@ namespace IJunior
                 _health = value;
 
                 if (_health <= 0)
-                    Console.WriteLine($"Самурай погиб смертью храбрых!");
+                    Console.WriteLine($"{Name} погиб смертью храбрых!");
             }
         }
 
@@ -129,6 +141,146 @@ namespace IJunior
                 return true;
             else
                 return false;
+        }
+    }
+
+    class Barbarian : IFighter
+    {
+        private int _health = 120;
+
+        public Barbarian(Weapon weapon)
+        {
+            Weapon = weapon;
+        }
+
+        public int Health
+        {
+            get => _health;
+
+            private set
+            {
+                _health = value;
+
+                if (_health <= 0)
+                    Console.WriteLine($"{Name} погиб!");
+            }
+        }
+
+        public Weapon Weapon { get; }
+
+        public string Name { get; } = "Варвар";
+
+        public int GetHealthInformation => _health;
+
+        public int DealDamage => Weapon.Damage;
+
+        public void GetDamage(int damage)
+        {
+            Health -= damage;
+        }
+
+        public void Attack(IDamagable something)
+        {
+            int rate = (int)Math.Round(TakePowerFactor());
+            Console.WriteLine($"У {Name} коэфицент силы: {rate}");
+            something.GetDamage(DealDamage*rate);
+        }
+
+        private float TakePowerFactor()
+        {
+            const int maxRate = 200;
+            const int fullRate = 100;
+
+            return (float)UserUtilits.GetRandomNumber(maxRate)/ fullRate;
+        }
+    }
+
+    class Fairy : IFighter
+    {
+        private int _health = 60;
+
+        public Fairy(Weapon weapon)
+        {
+            Weapon = weapon;
+        }
+
+        public int Health
+        {
+            get => _health;
+
+            private set
+            {
+                _health = value;
+
+                if (_health <= 0)
+                    Console.WriteLine($"{Name} погиб!");
+            }
+        }
+
+        public Weapon Weapon { get; }
+
+        public string Name { get; } = "Фея";
+
+        public int GetHealthInformation => _health;
+
+        public int DealDamage => Weapon.Damage;
+
+        public void GetDamage(int damage)
+        {
+            Health -= damage-ExtinguishDamage(damage);
+        }
+
+        public void Attack(IDamagable something)
+        {
+            something.GetDamage(DealDamage);
+        }
+
+        private int ExtinguishDamage(int damage)
+        {
+            int maxValue = damage;
+
+            return UserUtilits.GetRandomNumber(maxValue);
+        }
+    }
+
+    class Goblin : IFighter
+    {
+        private int _health = 40;
+
+        public Goblin(Weapon weapon)
+        {
+            Weapon = weapon;
+        }
+
+        public int Health
+        {
+            get => _health;
+
+            private set
+            {
+                _health = value;
+
+                if (_health <= 0)
+                    Console.WriteLine($"{Name} погиб!");
+            }
+        }
+
+        public Weapon Weapon { get; }
+
+        public string Name { get; } = "Гоблин";
+
+        public int GetHealthInformation => _health;
+
+        public int DealDamage => Weapon.Damage;
+
+        public void GetDamage(int damage)
+        {
+            Health -= damage;
+        }
+
+        public void Attack(IDamagable something)
+        {
+            something.GetDamage(DealDamage);
         }
     }
 }

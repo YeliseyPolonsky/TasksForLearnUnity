@@ -5,8 +5,8 @@ namespace IJunior
 {
     class Arena
     {
-        private List<IFighter> _fighters = new List<IFighter> { FighterBilder.CreateFighter("Маг"), FighterBilder.CreateFighter("Самурай") };
-
+        private List<IFighter> _fighters = new List<IFighter> { FighterBilder.CreateFighter("Маг"), FighterBilder.CreateFighter("Самурай"),
+                                                                FighterBilder.CreateFighter("Гоблин"), FighterBilder.CreateFighter("Фея"), FighterBilder.CreateFighter("Варвар")};
         public void Work()
         {
             Console.WriteLine("Добро пожаловать на Арену!!!");
