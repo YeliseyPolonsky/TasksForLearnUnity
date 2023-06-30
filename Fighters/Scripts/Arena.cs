@@ -95,11 +95,11 @@ namespace IJunior
                 Console.WriteLine($"{firstFighter.Name} : здоровье {firstFighter.GetHealthInformation}\n" +
                                   $"{secondFighter.Name} : здоровье {secondFighter.GetHealthInformation}\n");
                 Console.ReadKey();
-                SigleHit(firstFighter, secondFighter, ref isFighting);
+                Hit(firstFighter, secondFighter, ref isFighting);
             }
         }
 
-        private void SigleHit(IFighter firstFighter, IFighter secondFighter, ref bool isFighting)
+        private void Hit(IFighter firstFighter, IFighter secondFighter, ref bool isFighting)
         {
             firstFighter.Attack(secondFighter);
 
