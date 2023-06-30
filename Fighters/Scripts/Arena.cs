@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IJunior
 {
@@ -75,7 +72,7 @@ namespace IJunior
                     if (_fighters[i].Name == name)
                     {
                         Console.WriteLine($"Успешно! Вы выбрали \"{name}\"");
-                        resultFighter = GetNewFighterClone(_fighters[i]);
+                        resultFighter = FighterBilder.CreateFighter(name);
                         isWorkig = false;
                     }
                 }
@@ -87,28 +84,6 @@ namespace IJunior
             return resultFighter;
         }
 
-        private IFighter GetNewFighterClone(IFighter fighterCloned)
-        {
-            IFighter newfighter = null;
-
-            const string FirstFighterName = "Маг";
-            const string SecondFighterName = "Самурай";
-
-            foreach (IFighter fighter in _fighters)
-                switch (fighter.Name)
-                {
-                    case FirstFighterName:
-                        newfighter = new Magician(fighterCloned.Weapon);
-                        break;
-
-                    case SecondFighterName:
-                        newfighter = new Samurai(fighterCloned.Weapon);
-                        break;
-                }
-
-            return newfighter;
-        }
-
         private void Fight(IFighter firstFighter, IFighter secondFighter)
         {
             Console.WriteLine("\nБой начался!\n");
@@ -118,7 +93,7 @@ namespace IJunior
             while (isFighting)
             {
                 Console.WriteLine($"{firstFighter.Name} : здоровье {firstFighter.GetHealthInformation}\n" +
-                              $"{secondFighter.Name} : здоровье {secondFighter.GetHealthInformation}\n");
+                                  $"{secondFighter.Name} : здоровье {secondFighter.GetHealthInformation}\n");
                 Console.ReadKey();
                 SigleHit(firstFighter, secondFighter, ref isFighting);
             }
@@ -132,6 +107,7 @@ namespace IJunior
             {
                 isFighting = false;
                 Console.WriteLine("Бой окончен.");
+                return;
             }
 
             secondFighter.Attack(firstFighter);
@@ -140,6 +116,7 @@ namespace IJunior
             {
                 isFighting = false;
                 Console.WriteLine("Бой окончен.");
+                return;
             }
         }
 
