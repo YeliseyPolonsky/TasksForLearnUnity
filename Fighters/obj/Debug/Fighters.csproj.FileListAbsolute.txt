@@ -1,7 +1,0 @@
-C:\Users\Knight\source\repos\Fighters\obj\Debug\Fighters.csproj.AssemblyReference.cache
-C:\Users\Knight\source\repos\Fighters\obj\Debug\Fighters.csproj.CoreCompileInputs.cache
-C:\Users\Knight\source\repos\Fighters\bin\Debug\Fighters.exe.config
-C:\Users\Knight\source\repos\Fighters\bin\Debug\Fighters.exe
-C:\Users\Knight\source\repos\Fighters\bin\Debug\Fighters.pdb
-C:\Users\Knight\source\repos\Fighters\obj\Debug\Fighters.exe
-C:\Users\Knight\source\repos\Fighters\obj\Debug\Fighters.pdb
