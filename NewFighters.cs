@@ -46,8 +46,8 @@ namespace IJunior
 
     class Arena
     {
-        Fighter firstFighter;
-        Fighter secondFighter;
+        IFighter firstFighter;
+        IFighter secondFighter;
 
         public void Work()
         {
@@ -184,7 +184,31 @@ namespace IJunior
         }
     }
 
-    abstract class Fighter
+    interface IFighter : IAlive, IDamagable, IDealDamage, INamable { }
+
+    interface INamable
+    {
+        string Name { get; }
+    }
+
+    interface IDamagable
+    {
+        void GetHit(int damage);
+    }
+
+    interface IAlive
+    {
+        bool IsAlive { get; }
+
+        void ShowInformation();
+    }
+
+    interface IDealDamage
+    {
+        int DealDamage { get; }
+    }
+
+    abstract class Fighter : IFighter
     {
         protected int _health;
 
