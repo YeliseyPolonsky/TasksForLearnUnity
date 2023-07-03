@@ -40,18 +40,14 @@ namespace IJunior
     {
         static void Main(string[] args)
         {
-            new Arena(FighterBilder.CreateFighters()).Work();
+            new Arena().Work();
         }
     }
 
     class Arena
     {
-        private List<Fighter> _fighters;
-
-        public Arena(List<Fighter> fighters)
-        {
-            _fighters = fighters;
-        }
+        Fighter firstFighter;
+        Fighter secondFighter;
 
         public void Work()
         {
@@ -82,52 +78,22 @@ namespace IJunior
 
         private void StartFight()
         {
+            FighterBilder fighterBilder = new FighterBilder();
+
             Console.WriteLine("\nВыбирем первого бойца!");
-            Fighter firstFighter = GetFighterByName();
+            firstFighter = fighterBilder.CreateFighter();
 
             Console.WriteLine("\nВыбирем второго бойца!");
-            Fighter secondFighter = GetFighterByName();
+            secondFighter = fighterBilder.CreateFighter();
 
-            Fight(firstFighter, secondFighter);
-            ShowWinner(firstFighter, secondFighter);
+            Fight();
+            ShowWinner();
 
             Console.WriteLine("Бой окончен!");
             Console.ReadKey();
         }
 
-        private Fighter GetFighterByName()
-        {
-            bool isWorkig = true;
-            Fighter resultFighter = null;
-
-            Console.Write("Доступные бойцы :");
-
-            foreach (Fighter fighter in _fighters)
-                Console.Write(fighter.Name + " ");
-
-            while (isWorkig)
-            {
-                Console.Write("\nВведите имя бойца: ");
-                string name = Console.ReadLine();
-
-                for (int i = 0; i < _fighters.Count; i++)
-                {
-                    if (_fighters[i].Name == name)
-                    {
-                        Console.WriteLine($"Успешно! Вы выбрали \"{name}\"");
-                        resultFighter = FighterBilder.CreateFighter(name);
-                        isWorkig = false;
-                    }
-                }
-
-                if (resultFighter == null)
-                    Console.WriteLine("Бойца с таким именем не существует, попробуй еще раз.");
-            }
-
-            return resultFighter;
-        }
-
-        private void Fight(Fighter firstFighter, Fighter secondFighter)
+        private void Fight()
         {
             Console.WriteLine("\nБой начался!\n");
 
@@ -139,11 +105,12 @@ namespace IJunior
                 secondFighter.ShowInformation();
 
                 Console.ReadKey();
-                Hit(firstFighter, secondFighter, ref isFighting);
+                Hit(ref isFighting);
+                Console.WriteLine();
             }
         }
 
-        private void Hit(Fighter firstFighter, Fighter secondFighter, ref bool isFighting)
+        private void Hit(ref bool isFighting)
         {
             secondFighter.GetHit(firstFighter.DealDamage);
 
@@ -164,7 +131,7 @@ namespace IJunior
             }
         }
 
-        private void ShowWinner(Fighter firstFighter, Fighter secondFighter)
+        private void ShowWinner()
         {
             if (firstFighter.IsAlive)
             {
@@ -180,40 +147,39 @@ namespace IJunior
 
     class FighterBilder
     {
-        private static List<Fighter> _allFighters = new List<Fighter> { new Magician(), new Samurai(), new Barbarian(), new Fairy(), new Goblin(), };
+        private List<Fighter> _allFighters;
 
-        public static List<Fighter> CreateFighters()
+        public FighterBilder()
         {
-            return _allFighters;
+            UpdateList();
         }
 
-        public static Fighter CreateFighter(string name)
+        private void UpdateList()
         {
-            const string NameOfFirstFighter = "Маг";
-            const string NameOfSecondFighter = "Самурай";
-            const string NameOfThirdFighter = "Варвар";
-            const string NameOfFourthFighter = "Фея";
-            const string NameOfFifthFighter = "Гоблин";
-
-            switch (name)
+            _allFighters = new List<Fighter>(5)
             {
-                case NameOfFirstFighter:
-                    return new Magician();
+                new Barbarian(),
+                new Samurai(),
+                new Fairy(),
+                new Goblin(),
+                new Magician()
+            };
+        }
 
-                case NameOfSecondFighter:
-                    return new Samurai();
+        public Fighter CreateFighter()
+        {
+            ShowFighters();
+            Console.Write("Введите номер бойца: ");
+            int numberOfFighter = UserUtilits.GetNumber(1, _allFighters.Count);
+            UpdateList();
+            return _allFighters[--numberOfFighter];
+        }
 
-                case NameOfThirdFighter:
-                    return new Barbarian();
-
-                case NameOfFourthFighter:
-                    return new Fairy();
-
-                case NameOfFifthFighter:
-                    return new Goblin();
-
-                default:
-                    throw new Exception("Передано несуществующее имя бойца!");
+        private void ShowFighters()
+        {
+            for (int i = 0; i < _allFighters.Count; i++)
+            {
+                Console.WriteLine($"{_allFighters[i].Name} номер: {i + 1}");
             }
         }
     }
@@ -316,7 +282,7 @@ namespace IJunior
                 int rate = (int)Math.Round(TakePowerFactor());
                 Console.WriteLine($"У {Name} коэфицент силы: {rate}");
 
-                return DealDamage * rate;
+                return Weapon.Damage * rate;
             }
         }
 
