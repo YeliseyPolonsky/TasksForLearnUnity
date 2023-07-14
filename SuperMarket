@@ -1,0 +1,289 @@
+using System;
+using System.Collections.Generic;
+
+namespace IJunior
+{
+    static class UserUtilits
+    {
+        private static Random random = new Random();
+
+        public static int GetNumber()
+        {
+            int number;
+
+            while (int.TryParse(Console.ReadLine(), out number) == false)
+                Console.WriteLine("Не верный ввод повторите");
+
+            return number;
+        }
+
+        public static int GetRandomNumber(int maxValue) => random.Next(++maxValue);
+    }
+
+    sealed class Program
+    {
+        static void Main(string[] args)
+        {
+            new Supermarket().Work();
+        }
+    }
+
+    sealed class Supermarket
+    {
+        private List<Product> _products;
+        private Queue<Client> _clients;
+        private CashRegister _cashRegister;
+        private int _cashProfit;
+        private int _countClients;
+
+        public Supermarket()
+        {
+            _products = new ProductBilder().CreateAllProducts();
+            _cashRegister = new CashRegister();
+            _clients = new Queue<Client>();
+
+            Console.Write("Какое колличество клиентов сегодня придет?: ");
+            _countClients = UserUtilits.GetNumber();
+            ClientBilder clientBilder = new ClientBilder();
+
+            for (int i = 0; i < _countClients; i++)
+                _clients.Enqueue(clientBilder.CreateClient());
+        }
+
+        public void Work()
+        {
+            Client client;
+
+            for (int i = 0; i < _countClients; i++)
+            {
+                client = _clients.Dequeue();
+                Console.WriteLine($"\nЗдравствуйте, меня зовут {client.Name}" +
+                                   "\nCейчас я буду оплачивать покупки!");
+
+                bool isWorking = true;
+
+                while (isWorking)
+                {
+                    int allPrice = _cashRegister.GetAllPrice(client.GetProducts());
+                    Console.WriteLine($"Итоговая сумма {allPrice}");
+
+                    if (client.TryPayProducts(allPrice))
+                    {
+                        Console.Write("Успешно оплачено! Ваши продукты: ");
+
+                        foreach (Product product in client.GetProducts())
+                            Console.Write(product.Name + " ");
+
+                        _cashProfit += allPrice;
+                        isWorking = false;
+                    }
+                }
+
+                Console.WriteLine("\nНажмите любую клавишу для продолжения");
+                Console.ReadKey();
+            }
+
+            ShowResults();
+            Console.ReadKey();
+        }
+
+        private void ShowResults() => Console.WriteLine($"\nЗа сегодня наш супермаркет посетило {_countClients} клиентов" +
+                                                        $"\nПрибыль магазина - {_cashProfit}");
+    }
+
+    sealed class CashRegister
+    {
+        public int GetAllPrice(IReadOnlyList<Product> products)
+        {
+            int price = 0;
+
+            foreach (Product product in products)
+                price += product.Price;
+
+            return price;
+        }
+    }
+
+    sealed class ClientBilder
+    {
+        private List<string> _names;
+        private List<string> _surnames;
+        private List<string> _patronymics;
+
+        public ClientBilder()
+        {
+            _names = new List<string>()
+            {
+                "Маша",
+                "Саша",
+                "Илья",
+                "Петя",
+                "Елисей"
+            };
+
+            _surnames = new List<string>()
+            {
+                "Яковлев",
+                "Иванов",
+                "Третьяк",
+                "Дранец",
+                "Айрапетов"
+            };
+
+            _patronymics = new List<string>()
+            {
+                "Александрович",
+                "Андроникович",
+                "Юрьевич",
+                "Андреевич",
+                "Ильич"
+            };
+        }
+
+        public Client CreateClient()
+        {
+            ProductBilder productBilder = new ProductBilder();
+            int countProducts = productBilder.Products.Count;
+
+            int maxCountMoney = 200;
+            Client client = new Client(GetRandomName(), UserUtilits.GetRandomNumber(maxCountMoney));
+
+            for (int i = 0; i < UserUtilits.GetRandomNumber(countProducts - 1); i++)
+            {
+                client.TakeProduct(productBilder.Products[UserUtilits.GetRandomNumber(countProducts - 1)]);
+            }
+
+            return client;
+        }
+
+        private string GetRandomName()
+        {
+            string surname = _surnames[UserUtilits.GetRandomNumber(_surnames.Count - 1)];
+            string name = _names[UserUtilits.GetRandomNumber(_names.Count - 1)];
+            string patronymic = _patronymics[UserUtilits.GetRandomNumber(_patronymics.Count - 1)];
+
+            return surname + " " + name + " " + patronymic;
+        }
+    }
+
+    sealed class Client
+    {
+        private Basket _basket;
+        private int _money;
+
+        public Client(string name, int money)
+        {
+            _money = money;
+            Name = name;
+            _basket = new Basket();
+        }
+
+        public string Name { get; }
+
+        public IReadOnlyList<Product> GetProducts() => _basket._products;
+
+        public void TakeProduct(Product product) => _basket.AddProduct(product);
+
+        public bool TryPayProducts(int price)
+        {
+            if (_money >= price)
+            {
+                _money -= price;
+                return true;
+            }
+            else
+            {
+                DeleteRandomProduct();
+                return false;
+            }
+        }
+
+        public void DeleteRandomProduct()
+        {
+            Product excessProduct = _basket.DeleteProduct(UserUtilits.GetRandomNumber(_basket.GetCountProducts() - 1));
+            Console.WriteLine($"Mне не хватает денег, поэтому я выкладываю из своей карзины {excessProduct.Name}");
+        }
+    }
+
+    sealed class Basket
+    {
+        public List<Product> _products;
+
+        public Basket() => _products = new List<Product>();
+
+        public int GetCountProducts() => _products.Count;
+
+        public void AddProduct(Product product)
+        {
+            if (product != null)
+                _products.Add(product);
+        }
+
+        public Product DeleteProduct(int indexProduct)
+        {
+            Product excessProduct = _products[indexProduct];
+            _products.Remove(excessProduct);
+            return excessProduct;
+        }
+    }
+
+    sealed class ProductBilder
+    {
+        private List<Product> _products;
+
+        public List<Product> Products
+        {
+            private set => _products = value;
+
+            get
+            {
+                UpdateList();
+                return _products;
+            }
+        }
+
+        public ProductBilder() => UpdateList();
+
+        private void UpdateList()
+        {
+            _products = new List<Product>
+            {
+                new Product("Банан",20),
+                new Product("Апельсин",30),
+                new Product("Арбуз",60),
+                new Product("Дыня",55),
+                new Product("Хлеб",15),
+                new Product("Молоко",10),
+                new Product("Яйца",25),
+                new Product("Чипсы",45),
+                new Product("Картошка",30),
+                new Product("Клубника",65),
+                new Product("Земляника",70),
+                new Product("Груша",25),
+                new Product("Брусника",40),
+                new Product("Лук",20),
+                new Product("Чеснок",10),
+                new Product("Помидор",5),
+                new Product("Йогурт",25),
+                new Product("Сырок",30),
+                new Product("Пельмени",35),
+                new Product("Огурец",5)
+            };
+        }
+
+        public List<Product> CreateAllProducts() => Products;
+    }
+
+    sealed class Product
+    {
+        public Product(string name, int price)
+        {
+            Name = name;
+            Price = price;
+        }
+
+        public string Name { get; }
+
+        public int Price { get; }
+    }
+}
